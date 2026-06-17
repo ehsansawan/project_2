@@ -5,13 +5,15 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable ,SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -19,9 +21,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
+        'phone',
+        'national_id',
         'password',
+        'birth_date',
     ];
 
     /**
@@ -45,5 +51,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+     public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    public function scoreLogs()
+    {
+        return $this->hasMany(ScoreLog::class);
+    }
+
+     public function userSkills()
+    {
+        return $this->hasMany(UserSkill::class);
+    }
+
+    public function userCertificates()
+    {
+        return $this->hasManyThrough(UserCertificate::class, UserSkill::class);
+    }
+    public function licenseProperties()
+    {
+        return $this->belongsToMany(LicenseProperty::class, 'user_license_properties');
     }
 }
