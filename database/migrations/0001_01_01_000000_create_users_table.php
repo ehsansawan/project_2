@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('password');
             $table->date('birth_date');
             $table->timestamp('email_verified_at')->nullable();
+            $table->boolean('privacy_policy_accepted')->default(false);
+            $table->boolean('terms_of_service_accepted')->default(false);
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

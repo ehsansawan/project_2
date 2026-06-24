@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_certificates', function (Blueprint $table) {
+        Schema::create('donations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_skill_id')->constrained('user_skills')->cascadeOnDelete();
-            $table->string('file_path')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->decimal('payment', 10, 2);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_certificates');
+        Schema::dropIfExists('donations');
     }
 };

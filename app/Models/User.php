@@ -28,6 +28,8 @@ class User extends Authenticatable
         'national_id',
         'password',
         'birth_date',
+        'privacy_policy_accepted',
+        'terms_of_service_accepted',
     ];
 
     /**
@@ -60,7 +62,7 @@ class User extends Authenticatable
 
     public function scoreLogs()
     {
-        return $this->hasMany(ScoreLog::class);
+        return $this->hasMany(ScoreLog::class)->latest();
     }
 
      public function userSkills()
@@ -75,5 +77,13 @@ class User extends Authenticatable
     public function licenseProperties()
     {
         return $this->belongsToMany(LicenseProperty::class, 'user_license_properties');
+    }
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+    public function donations()
+    {
+        return $this->hasMany(Donation::class);
     }
 }

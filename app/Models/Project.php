@@ -22,6 +22,7 @@ class Project extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'budget' => 'decimal:2',
+        'user_id' => 'integer',
     ];
 
     public function participants()
@@ -37,5 +38,13 @@ class Project extends Model
     public function media()
     {
         return $this->hasMany(ProjectMedia::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function donations()
+    {
+        return $this->hasMany(Donation::class);
     }
 }

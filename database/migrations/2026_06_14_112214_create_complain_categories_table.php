@@ -11,20 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_certificates', function (Blueprint $table) {
+        Schema::create('complain_categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_skill_id')->constrained('user_skills')->cascadeOnDelete();
-            $table->string('file_path')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->string('name');
             $table->timestamps();
         });
     }
 
-    /**
+    /** ['roads', 'waste', 'services', 'other']
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_certificates');
+        Schema::dropIfExists('complain_categories');
     }
 };

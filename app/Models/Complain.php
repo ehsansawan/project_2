@@ -14,7 +14,7 @@ class Complain extends Model
         'title',
         'description',
         'type',
-        'category',
+        'category_id',
         'status',
         'priority_score',
         'pin_id',
@@ -22,7 +22,7 @@ class Complain extends Model
 
     protected $casts = [
         'type' => 'string',
-        'category' => 'string',
+        'category_id' => 'integer',
         'status' => 'string',
         'priority_score' => 'integer',
     ];
@@ -50,5 +50,9 @@ class Complain extends Model
     public function contentFlags()
     {
         return $this->hasMany(Report::class, 'complain_id');
+    }
+    public function category()
+    {
+        return $this->belongsTo(ComplainCategory::class, 'category_id');
     }
 }

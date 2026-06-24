@@ -23,9 +23,4 @@ class Profile extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function scoreLogs(): HasMany
-    {
-        return $this->hasMany(ScoreLog::class);
-    }
 }

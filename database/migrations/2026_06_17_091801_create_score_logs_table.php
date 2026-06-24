@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('score_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('score_rule_id')->nullable()->constrained('score_rules')->cascadeOnDelete();
             $table->integer('point_change'); 
             $table->enum('type', ['citizenship', 'credibility']);
             $table->string('reason');

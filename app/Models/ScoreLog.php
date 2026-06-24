@@ -12,6 +12,7 @@ class ScoreLog extends Model
 
     protected $fillable = [
         'user_id',
+        'score_rule_id',
         'point_change',
         'type',
         'reason',
@@ -20,5 +21,9 @@ class ScoreLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+       public function scoreRule()
+    {
+        return $this->belongsTo(ScoreRule::class, 'score_rule_id');
     }
 }

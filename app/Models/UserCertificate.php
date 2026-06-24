@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class UserCertificate extends Model
 {
       protected $fillable =
-       ['user_skill_id','file_path',];
+       ['user_skill_id','file_path','status'];
 
     protected $casts = [
         'is_verified' => 'boolean',
         'issue_date' => 'date',
+        'status' => 'string',
     ];
 
     public function user()

@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_certificates', function (Blueprint $table) {
+        Schema::create('score_rules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_skill_id')->constrained('user_skills')->cascadeOnDelete();
-            $table->string('file_path')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->string('name');
+            $table->enum('type',['citizenship', 'credibility']);
+            $table->integer('points');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_certificates');
+        Schema::dropIfExists('score_rules');
     }
 };

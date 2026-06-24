@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('complains', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->text('description');
             $table->enum('type', ['individual', 'collective','emergency']);
-            $table->enum('category', ['roads', 'waste', 'services', 'other']);
+            $table->foreignId('category_id')->constrained('complain_categories')->cascadeOnDelete();
             $table->enum('status', ['pending', 'under_review', 'resolved', 'rejected'])->default('pending');
             $table->integer('priority_score')->default(0);
-            $table->foreignId('pin_id')->nullable()->constrained('map_pins')->nullOnDelete();
+            $table->foreignId('pin_id')->constrained('map_pins')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
