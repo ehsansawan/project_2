@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,12 +16,13 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('phone')->unique()->nullable();
-            $table->string('national_id')->unique();
+            $table->string('national_id')->unique()->nullable();
             $table->string('password');
             $table->date('birth_date');
             $table->timestamp('email_verified_at')->nullable();
             $table->boolean('privacy_policy_accepted')->default(false);
             $table->boolean('terms_of_service_accepted')->default(false);
+            $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
@@ -53,4 +53,5 @@ return new class extends Migration
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }
+
 };
