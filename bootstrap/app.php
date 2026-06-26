@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Responses\ApiResponse;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -52,6 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 403
             );
         });
+
         $exceptions->renderable(function (NotFoundHttpException $e, $request) {
             return ApiResponse::error(
                 ['route_not_found'],
@@ -67,6 +72,76 @@ return Application::configure(basePath: dirname(__DIR__))
                 'Method not allowed.',
                 405
             );
+        });
+        $exceptions->renderable(function (
+            ThrottleRequestsException $e,
+                                      $request
+        ) {
+            return ApiResponse::error(
+                ['too_many_requests'],
+                'Too many requests. Please try again later.',
+                429
+            );
+        });
+
+
+        $exceptions->renderable(function (
+            ModelNotFoundException $e,
+                                   $request
+        ) {
+            return ApiResponse::error(
+                ['resource_not_found'],
+                'Requested resource not found.',
+                404
+            );
+        });
+
+        $exceptions->renderable(function (
+            QueryException $e,
+                           $request
+        ) {
+            return ApiResponse::error(
+                ['database_error'],
+                'Database operation failed.',
+                500
+            );
+        });
+
+        $exceptions->renderable(function (
+            AuthorizationException $e,
+                                   $request
+        ) {
+            return ApiResponse::error(
+                ['forbidden'],
+                'You are not authorized.',
+                403
+            );
+        });
+
+//        $exceptions->renderable(function (\Throwable $e, $request) {
+//
+//            return ApiResponse::error(
+//                ['internal_server_error'],
+//                'Internal server error.',
+//                500
+//            );
+//        });
+
+        $exceptions->renderable(function (\Throwable $e, $request) {
+
+//            if (config('app.debug')) {
+
+                return ApiResponse::error(
+                    [
+                        'exception' => class_basename($e),
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                    ],
+                    'Internal server error.',
+                    500
+                );
+
         });
 
     })->create();

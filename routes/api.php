@@ -35,7 +35,7 @@ Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return \App\Http\Responses\ApiResponse::success(true,'Verification link sent!');
 })
-    ->middleware(['auth:api','throttle:6,1'])->name('verification.send');
+    ->middleware([jwtMiddleware::class,'throttle:2,1'])->name('verification.send');
 
 //auth
 Route::controller(AuthController::class)->prefix('auth')
