@@ -5,15 +5,16 @@ namespace App\Models;
  use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
  use Laravel\Sanctum\HasApiTokens;
  use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject, MustVerifyEmail
+class User extends Authenticatable implements JWTSubject,MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens,SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +29,8 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'phone',
         'national_id',
         'birth_date',
+        'privacy_policy_accepted',
+        'terms_of_service_accepted',
     ];
 
     /**
@@ -74,4 +77,36 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     }
 
 
+
+     public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    public function scoreLogs()
+    {
+        return $this->hasMany(ScoreLog::class)->latest();
+    }
+
+     public function userSkills()
+    {
+        return $this->hasMany(UserSkill::class);
+    }
+
+    public function userCertificates()
+    {
+        return $this->hasManyThrough(UserCertificate::class, UserSkill::class);
+    }
+    public function licenseProperties()
+    {
+        return $this->belongsToMany(LicenseProperty::class, 'user_license_properties');
+    }
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+    public function donations()
+    {
+        return $this->hasMany(Donation::class);
+    }
 }
