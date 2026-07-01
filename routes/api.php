@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ComplainController;
 
 Route::get('/email/verify/{id}/{hash}', function (Request $request) {
     $user = User::findOrFail($request->route('id'));
@@ -49,4 +49,15 @@ Route::controller(AuthController::class)->prefix('auth')
         Route::post('/forgetPassword','forgetPassword')->name('forgetPassword');
         Route::post('/resetPassword','resetPassword')->name('resetPassword');
         Route::post('/checkCode','checkCode')->name('checkCode');
+    });
+
+    //complains routes
+     Route::controller(ComplainController::class)
+        ->prefix("complains")
+        ->group(function () {
+            Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
+            Route::get("/","index");
+            Route::get("/{complainId}","show");
+            Route::put("/{complainId}","update");
+            Route::delete("/{complainId}","destroy");
     });

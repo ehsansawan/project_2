@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
 
 class ComplainMedia extends Model
@@ -19,5 +20,9 @@ class ComplainMedia extends Model
     public function complain()
     {
         return $this->belongsTo(Complain::class);
+    }  
+    public function getFileUrlAttribute(): string
+    {
+        return Storage::url($this->file_path);
     }
 }
