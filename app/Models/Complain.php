@@ -55,4 +55,8 @@ class Complain extends Model
     {
         return $this->belongsTo(ComplainCategory::class, 'category_id');
     }
+    public function media()
+    {
+        return $this->hasMany(ComplainMedia::class);
+    }
 }
