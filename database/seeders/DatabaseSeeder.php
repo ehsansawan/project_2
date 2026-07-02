@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ComplainCategorySeeder::class,
             UserSeeder::class,
+            ReportTypeSeeder::class,
         ]);
     }
 }

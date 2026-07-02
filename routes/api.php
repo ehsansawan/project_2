@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ComplainController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/email/verify/{id}/{hash}', function (Request $request) {
     $user = User::findOrFail($request->route('id'));
@@ -52,7 +53,7 @@ Route::controller(AuthController::class)->prefix('auth')
     });
 
     //complains routes
-     Route::controller(ComplainController::class)
+    Route::controller(ComplainController::class)
         ->prefix("complains")
         ->group(function () {
             Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
@@ -61,3 +62,10 @@ Route::controller(AuthController::class)->prefix('auth')
             Route::put("/{complainId}","update");
             Route::delete("/{complainId}","destroy");
     });
+
+    Route::controller(ReportController::class)
+        ->prefix("reports")
+        ->group(function(){
+            Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
+        });
+    

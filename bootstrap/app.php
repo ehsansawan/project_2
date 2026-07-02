@@ -34,12 +34,12 @@ return Application::configure(basePath: dirname(__DIR__))
 //                })
 //                ->toArray();
 
-            $errors = collect($validator->failed())
-                ->map(fn ($rules) => array_map('strtolower', array_keys($rules)))
-                ->toArray();
+        //     $errors = collect($validator->failed())
+        //         ->map(fn ($rules) => array_map('strtolower', array_keys($rules)))
+        //         ->toArray();
 
             return ApiResponse::validation(
-                $errors,
+                $e->errors(),
                 'Validation Error.'
             );
         });
