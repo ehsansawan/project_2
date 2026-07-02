@@ -14,6 +14,8 @@ class Report extends Model
         'status',
         'reported_at',
         'reviewed_at',
+        'decision_reason',
+        'reviewed_by',
     ];
 
     protected $casts = [
