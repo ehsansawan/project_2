@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AccountStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +24,9 @@ return new class extends Migration {
             $table->boolean('privacy_policy_accepted')->default(false);
             $table->boolean('terms_of_service_accepted')->default(false);
             $table->string('fcm_token')->nullable();
+            $table->enum('account_status',array_column(AccountStatus::cases(), 'value'))->default(AccountStatus::Visitor->value);
+            $table->unsignedInteger('verification_attempts')->default(0);
+            $table->timestamp('expires_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

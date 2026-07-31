@@ -32,6 +32,9 @@ use Illuminate\Database\Eloquent\Relations;
         'birth_date',
         'privacy_policy_accepted',
         'terms_of_service_accepted',
+        'verification_attempts',
+        'account_status',
+        'expires_at'
     ];
 
     /**
@@ -109,5 +112,10 @@ use Illuminate\Database\Eloquent\Relations;
     public function donations()
     {
         return $this->hasMany(Donation::class);
+    }
+
+    public function verificationRequests()
+    {
+        return $this->hasMany(VerificationRequests::class);
     }
 }
