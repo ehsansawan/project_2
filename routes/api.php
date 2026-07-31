@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VerificationController;
 use App\Http\Middleware\jwtMiddleware;
 use App\Http\Middleware\VerifiedEmail;
 use App\Models\User;
@@ -52,6 +54,41 @@ Route::controller(AuthController::class)->prefix('auth')
         Route::post('/checkCode','checkCode')->name('checkCode');
     });
 
+Route::middleware([jwtMiddleware::class,])->group(function () {
+
+    // Verification_request
+    Route::controller(VerificationController::class)->prefix('verification')
+        ->name('verification.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::post('/store', 'store')->name('store');
+            Route::post('/update', 'update')->name('update');
+//            Route::delete('/{id}', 'destroy')->name('destroy');
+
+            // Admin routes
+
+            Route::post('/adminIndex', 'adminIndex')->name('adminIndex');
+            Route::get('/adminShow/{id}', 'adminShow')->name('adminShow');
+            Route::get('adminIndexByUser/{user_id}','adminIndexByUser')->name('adminIndexByUser');
+            Route::get('/approve/{id}', 'approve')->name('approve');
+            Route::post('/reject/{id}', 'reject')->name('reject');
+
+        });
+
+    Route::controller(ProfileController::class)->prefix('profile')
+        ->name('profile.')
+        ->group(function () {
+            Route::get('/','index')->name('index');
+            Route::get('/show/{id}', 'show')->name('show');
+            Route::post('/update', 'update')->name('update');
+        });
+
+
+});
+
+
+
     //complains routes
     Route::controller(ComplainController::class)
         ->prefix("complains")
@@ -68,4 +105,3 @@ Route::controller(AuthController::class)->prefix('auth')
         ->group(function(){
             Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
         });
-    

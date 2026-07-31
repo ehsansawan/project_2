@@ -131,6 +131,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
 //            if (config('app.debug')) {
 
+            
                 return ApiResponse::error(
                     [
                         'exception' => class_basename($e),
