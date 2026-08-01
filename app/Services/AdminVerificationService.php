@@ -117,7 +117,8 @@ class AdminVerificationService
 
             $verification->user->update([
                 'account_status' => AccountStatus::Verified->value,
-                'credibility_score' => 100,
+                'national_id'=>$verification->national_id,
+                'credibility_score' => 60,
                 'expires_at' => null,
             ]);
             $verification->user->profile->update([
@@ -196,7 +197,7 @@ class AdminVerificationService
                     'user_id'=>auth('api')->id() ,// this id for admin who take the action
                     'verification_request_id' => $id,
                     'reason' => $request['reason'],
-                    'description' => $request['description']??'',
+                    'description' => $request['description']??null,
                 ]
             );
 

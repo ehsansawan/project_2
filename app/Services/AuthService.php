@@ -38,7 +38,7 @@ class AuthService
             'last_name'=>$request['last_name']??null,
             'email'=>$request['email']??null,
             'phone'=>$request['phone']??null,
-            'national_id'=>$request['national_id']??null,
+            //'national_id'=>$request['national_id']??null,
             'password'=>Hash::make($request['password']),
             'birth_date'=>$request['birth_date'],
             'fcm_token'=>$request['fcm_token']??null,

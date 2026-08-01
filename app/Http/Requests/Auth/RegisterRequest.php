@@ -39,12 +39,12 @@ class RegisterRequest extends FormRequest
                     ->numbers()
                     ->symbols()
             ],
-            'national_id' => [
-                'nullable',
-                'string',
-                'regex:/^[0-9]{11}$/',
-                'unique:users,national_id',
-            ],
+//            'national_id' => [
+//                'nullable',
+//                'string',
+//                'regex:/^[0-9]{11}$/',
+//                'unique:users,national_id',
+//            ],
             'birth_date' => 'required|date',
             'fcm_token' => 'string|nullable',
           //  'privacy_policy_accepted'=>'required|accepted',

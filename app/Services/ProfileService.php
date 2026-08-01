@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AccountStatus;
 use App\Models\Profile;
 use App\Traits\PictureTrait;
 
@@ -51,6 +52,15 @@ class ProfileService
     {
 
        $user=auth()->user();
+
+       if ($user->account_status == AccountStatus::Visitor->value) {
+           $user->update([
+               'first_name' => $request['first_name'] ?? $user->first_name,
+               'last_name' => $request['last_name'] ?? $user->last_name,
+               'birth_date' => $request['birth_date'] ?? $user->birth_date,
+           ]);
+       }
+
        $image=$request['image']??null;
 
        if($image)
@@ -63,13 +73,13 @@ class ProfileService
        }
 
         $user->profile->update([
-                'description'=>$request['description']??$user->profile->description,
                 'image'=>$path??$user->profile->image,
+
             ]
         );
 
 
-       $profile=$user->profile->with('user')->first();
+       $profile=$user->profile()->with('user')->first();
 
 
        $message="Profile updated successfully";

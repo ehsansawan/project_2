@@ -12,7 +12,7 @@ class Profile extends Model
      use SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'status', 'citizenship_score', 'credibility_score','image','description'
+        'user_id', 'status', 'citizenship_score', 'credibility_score','image',
     ];
 
     protected $casts = [

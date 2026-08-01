@@ -24,7 +24,10 @@ class StoreVerificationFormRequest extends FormRequest
     {
         return [
             //
-            'national_id' => 'required|numeric|digits:11',
+            'national_id' => ['required',
+                'string',
+                'regex:/^[0-9]{11}$/',
+                'unique:users,national_id'],
             'images' => 'required|array|size:2',
             'images.*' => 'required|image|mimes:jpeg,jpg,png,webp|max:4096',
 

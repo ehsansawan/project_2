@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\AccountStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProfileRequest extends FormRequest
 {
@@ -22,9 +24,12 @@ class UpdateProfileRequest extends FormRequest
      */
     public function rules(): array
     {
+        $canEditIdentity = auth()->user()->account_status === AccountStatus::Visitor->value;
+
         return [
-            //
-            'description'=>'string|nullable',
+            'birth_date' => [Rule::when($canEditIdentity, 'date', 'prohibited')],
+            'first_name' => [Rule::when($canEditIdentity, 'string', 'prohibited'), 'max:255'],
+            'last_name' => [Rule::when($canEditIdentity, 'string', 'prohibited'), 'max:255'],
             'image'=>'nullable|image|mimes:jpeg,jpg,png,webp|max:4096'
         ];
     }
