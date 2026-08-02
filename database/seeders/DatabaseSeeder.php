@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ComplainCategorySeeder::class,
             UserSeeder::class,
             ReportTypeSeeder::class,
+            ServiceSeeder::class,
         ]);
     }
 }
