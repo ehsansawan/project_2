@@ -11,7 +11,7 @@ trait PictureTrait
     public static function storePicture(UploadedFile $file, string $directory = 'uploads'): string
     {
         $filename = time() . '_' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        
+
         // يرجع المسار النسبي فقط (مثال: complains/images/123_abc.jpg)
         return $file->storeAs($directory, $filename, 'public');
     }

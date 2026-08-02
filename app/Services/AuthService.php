@@ -3,7 +3,9 @@
 namespace App\Services;
 
 
+use App\Enums\AccountStatus;
 use App\Mail\SendCodeResetPassword;
+use App\Models\Profile;
 use App\Models\ResetCodePassword;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -36,10 +38,11 @@ class AuthService
             'last_name'=>$request['last_name']??null,
             'email'=>$request['email']??null,
             'phone'=>$request['phone']??null,
-            'national_id'=>$request['national_id']??null,
+            //'national_id'=>$request['national_id']??null,
             'password'=>Hash::make($request['password']),
             'birth_date'=>$request['birth_date'],
             'fcm_token'=>$request['fcm_token']??null,
+            'account_status'=>AccountStatus::Visitor->value,
         ]);
 
         if(!$user)
@@ -53,6 +56,12 @@ class AuthService
         //this function send email the $request['email']
          event(new Registered($user));
 
+        $user->refresh();
+
+        Profile::query()->create([
+            'user_id'=>$user->id,
+
+        ]);
 
 
         $message='user registered successfully';
