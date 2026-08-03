@@ -91,7 +91,7 @@ class UserSeeder extends Seeder
         $profiles = [
             [
                 'user_id' => 1,
-                'profile_name' => 'Ahmad Citizen',
+                // 'profile_name' => 'Ahmad Citizen',
                 'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
@@ -100,7 +100,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_id' => 2,
-                'profile_name' => 'Sara Unverified',
+                // 'profile_name' => 'Sara Unverified',
                 'status' => 'unverified',
                 'citizenship_score' => 0,
                 'credibility_score' => 0,
@@ -109,7 +109,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_id' => 3,
-                'profile_name' => 'Omar Employee',
+                // 'profile_name' => 'Omar Employee',
                 'status' => 'verified',
                 'citizenship_score' => 50,
                 'credibility_score' => 50,
@@ -118,7 +118,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_id' => 4,
-                'profile_name' => 'Mohammed Citizen',
+                // 'profile_name' => 'Mohammed Citizen',
                 'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
@@ -127,7 +127,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_id' => 5,
-                'profile_name' => 'Ali Citizen',
+                // 'profile_name' => 'Ali Citizen',
                 'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
@@ -136,7 +136,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_id' => 6,
-                'profile_name' => 'maia Citizen',
+                // 'profile_name' => 'maia Citizen',
                 'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
