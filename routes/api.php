@@ -48,7 +48,7 @@ Route::controller(AuthController::class)->prefix('auth')
         Route::post('/register', 'register')->name('register');
         Route::post('/login', 'login')->name('login');
         Route::middleware('auth:api')->post('/logout', 'logout')->name('logout');
-        Route::middleware(jwtMiddleware::class)->post('/refresh', 'refresh')->name('refresh')->middleware(VerifiedEmail::class);
+        Route::post('/refresh', 'refresh')->name('refresh');
         Route::post('/forgetPassword','forgetPassword')->name('forgetPassword');
         Route::post('/resetPassword','resetPassword')->name('resetPassword');
         Route::post('/checkCode','checkCode')->name('checkCode');

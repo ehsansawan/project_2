@@ -15,16 +15,17 @@ class AdminVerificationService
     /**
      * Create a new class instance.
      */
-    public function __construct()
+    private FcmService $fcmService;
+    public function __construct(FcmService $fcmService)
     {
         //
-
+          $this->fcmService = $fcmService;
     }
     public function adminIndex( array $request): array
     {
 
         $query = VerificationRequests::query()
-            ->with(['user', 'images']);
+            ->with(['user.profile', 'images','rejections']);
 
         if (!empty($request['status'])) {
             $query->whereIn('status', $request['status']);
@@ -52,7 +53,7 @@ class AdminVerificationService
         }
 
         $verificationRequests = $user->verificationRequests()
-            ->with(['user', 'images'])
+            ->with(['user.profile', 'images','rejections'])
             ->latest()
             ->paginate(15);
 
@@ -64,7 +65,7 @@ class AdminVerificationService
     public function adminShow($id)
     {
         $verificationRequest = VerificationRequests::query()
-            ->with(['user', 'images'])
+            ->with(['user.profile', 'images','rejections'])
             ->find($id);
 
         if(!$verificationRequest)
@@ -118,7 +119,6 @@ class AdminVerificationService
             $verification->user->update([
                 'account_status' => AccountStatus::Verified->value,
                 'national_id'=>$verification->national_id,
-                'credibility_score' => 60,
                 'expires_at' => null,
             ]);
             $verification->user->profile->update([
@@ -132,9 +132,27 @@ class AdminVerificationService
                 'action' => AuditAction::Approve->value,
             ]);
 
-            // Notification
-
             DB::commit();
+            // Notification
+            $title='Verification Approved';
+            $body='Your account has been verified successfully.';
+            $data=['type' => 'verification', 'status' => 'approved', 'request_id' => (string) $verification->id];
+
+            $this->fcmService->sendToUser(
+                $verification->user,
+                $title,
+                $body,
+                $data
+            );
+
+            $this->fcmService->storeNotification(
+                $verification->user,
+                $title,
+                $body,
+                $data
+            );
+
+
 
             $verification->load(['user', 'images']);
 
@@ -203,6 +221,8 @@ class AdminVerificationService
 
 
 
+
+
             $user = $verification->user;
 
             if($user->expires_at == null)
@@ -232,11 +252,31 @@ class AdminVerificationService
                 'action' => AuditAction::Reject->value,
             ]);
 
-            // Notification
-
             DB::commit();
 
-            $verification->load(['user', 'images']);
+            // Notification
+
+            $title='Verification Rejected';
+            $body='Your verification request was rejected.';
+            $data=  ['type' => 'verification', 'status' => 'rejected', 'request_id' => (string) $verification->id];
+
+            $this->fcmService->sendToUser(
+                $verification->user,
+                $title,
+                $body,
+                $data
+            );
+
+            $this->fcmService->storeNotification(
+                $verification->user,
+                $title,
+                $body,
+                $data
+            );
+
+
+
+            $verification->load(['user', 'images','rejections']);
 
             return [
                 'data' => $verification,

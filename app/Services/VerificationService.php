@@ -25,7 +25,7 @@ class VerificationService
         $user = auth()->user();
 
         $verificationRequests = $user->verificationRequests()
-            ->with('images')
+            ->with('user','images','rejections')
             ->latest()
             ->get();
 
@@ -237,7 +237,7 @@ class VerificationService
                     ]);
                 }
 
-                $verification->load('images');
+                $verification->load(['user','images','rejections']);
             }
 
 

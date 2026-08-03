@@ -18,5 +18,11 @@ enum RejectionReason:string
 
     case DuplicateRequest = 'duplicate_request';
 
+    case FirstNameMismatch = 'first_name_mismatch';
+
+    case LastNameMismatch = 'last_name_mismatch';
+
+    case DateOfBirthMismatch = 'date_of_birth_mismatch';
+
     case Other = 'other';
 }

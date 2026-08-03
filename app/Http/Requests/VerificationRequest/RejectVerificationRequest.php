@@ -22,10 +22,8 @@ class RejectVerificationRequest extends FormRequest
                 'exists:verification_requests,id',
             ],
 
-            'reason' => [
-                'required',
-                new Enum(RejectionReason::class),
-            ],
+            'reason' => ['required', 'array', 'min:1'],
+            'reason.*' => ['required', new Enum(RejectionReason::class)],
 
             'description' => [
                 'nullable',
