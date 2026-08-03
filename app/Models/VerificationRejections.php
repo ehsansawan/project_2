@@ -11,6 +11,9 @@ class VerificationRejections extends Model
     use softDeletes;
     protected $fillable=['user_id','verification_request_id','reason','description'];
 
+    protected $casts = [
+        'reason' => 'array',
+    ];
     public function user()
     {
         return $this->belongsTo(User::class);

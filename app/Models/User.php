@@ -118,4 +118,10 @@ use Illuminate\Database\Eloquent\Relations;
     {
         return $this->hasMany(VerificationRequests::class);
     }
+
+     public function notifications()
+     {
+         return $this->hasMany(Notification::class);
+     }
+
 }

@@ -17,8 +17,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();// admin who reject
             $table->foreignId('verification_request_id')
                 ->constrained('verification_requests')->cascadeOnDelete();
-            $table->enum('reason', array_column(RejectionReason::cases(), 'value'));
-            $table->text('description');
+//            $table->enum('reason', array_column(RejectionReason::cases(), 'value'));
+            $table->json('reason')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
