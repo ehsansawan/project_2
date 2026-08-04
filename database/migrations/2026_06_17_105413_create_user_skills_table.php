@@ -15,7 +15,7 @@ return new class extends Migration
            $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('name');
-            $table->enum('type',['technical','soft','other'])->nullable();
+            $table->enum('type', array_column(\App\Enums\SkillType::cases(), 'value'));
             $table->timestamps();
         });
     }
