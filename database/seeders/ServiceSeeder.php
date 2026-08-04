@@ -42,9 +42,9 @@ class ServiceSeeder extends Seeder
             ],
         ];
 
-        // foreach ($services as $serviceData) {
-        //     Service::create($serviceData);
-        // }
+        foreach ($services as $serviceData) {
+            Service::create($serviceData);
+        }
 
         // $employees = User::where('role', 'employee')->get();
         // $services = Service::all();

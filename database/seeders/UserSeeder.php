@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use App\Enums\AccountStatus;
 
 class UserSeeder extends Seeder
 {
@@ -20,6 +21,7 @@ class UserSeeder extends Seeder
                 'national_id' => '12345678901',
                 'password' => Hash::make('password123'),
                 'birth_date' => '1990-01-01',
+                'account_status' => AccountStatus::Verified,
                 'email_verified_at' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -32,6 +34,7 @@ class UserSeeder extends Seeder
                 'national_id' => '12345678902',
                 'password' => Hash::make('password123'),
                 'birth_date' => '1995-05-05',
+                'account_status' => AccountStatus::Visitor,
                 'email_verified_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -44,6 +47,7 @@ class UserSeeder extends Seeder
                 'national_id' => '12345678903',
                 'password' => Hash::make('password123'),
                 'birth_date' => '1985-10-10',
+                'account_status' => AccountStatus::Verified,
                 'email_verified_at' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -56,6 +60,7 @@ class UserSeeder extends Seeder
                 'national_id' => '12345678961',
                 'password' => Hash::make('password123'),
                 'birth_date' => '1990-01-01',
+                'account_status' => AccountStatus::Verified,
                 'email_verified_at' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -68,6 +73,7 @@ class UserSeeder extends Seeder
                 'national_id' => '12345678301',
                 'password' => Hash::make('password123'),
                 'birth_date' => '1990-01-01',
+                'account_status' => AccountStatus::Verified,
                 'email_verified_at' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -80,6 +86,7 @@ class UserSeeder extends Seeder
                 'national_id' => '12325678901',
                 'password' => Hash::make('password123'),
                 'birth_date' => '1990-01-01',
+                'account_status' => AccountStatus::Verified,
                 'email_verified_at' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -92,7 +99,6 @@ class UserSeeder extends Seeder
             [
                 'user_id' => 1,
                 // 'profile_name' => 'Ahmad Citizen',
-                'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
                 'created_at' => Carbon::now(),
@@ -101,7 +107,7 @@ class UserSeeder extends Seeder
             [
                 'user_id' => 2,
                 // 'profile_name' => 'Sara Unverified',
-                'status' => 'unverified',
+                // 'status' => 'unverified',
                 'citizenship_score' => 0,
                 'credibility_score' => 0,
                 'created_at' => Carbon::now(),
@@ -110,7 +116,7 @@ class UserSeeder extends Seeder
             [
                 'user_id' => 3,
                 // 'profile_name' => 'Omar Employee',
-                'status' => 'verified',
+                // 'status' => 'verified',
                 'citizenship_score' => 50,
                 'credibility_score' => 50,
                 'created_at' => Carbon::now(),
@@ -119,7 +125,7 @@ class UserSeeder extends Seeder
             [
                 'user_id' => 4,
                 // 'profile_name' => 'Mohammed Citizen',
-                'status' => 'verified',
+                // 'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
                 'created_at' => Carbon::now(),
@@ -128,7 +134,7 @@ class UserSeeder extends Seeder
             [
                 'user_id' => 5,
                 // 'profile_name' => 'Ali Citizen',
-                'status' => 'verified',
+                // 'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
                 'created_at' => Carbon::now(),
@@ -137,7 +143,7 @@ class UserSeeder extends Seeder
             [
                 'user_id' => 6,
                 // 'profile_name' => 'maia Citizen',
-                'status' => 'verified',
+                // 'status' => 'verified',
                 'citizenship_score' => 100,
                 'credibility_score' => 100,
                 'created_at' => Carbon::now(),
