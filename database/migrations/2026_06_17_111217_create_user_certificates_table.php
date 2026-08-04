@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_skill_id')->constrained('user_skills')->cascadeOnDelete();
             $table->string('file_path')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('reason', array_column(\App\Enums\CertificateStutus::cases(), 'value'));
             $table->timestamps();
         });
     }
