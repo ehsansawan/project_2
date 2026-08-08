@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\VerificationRequest\AdminIndexRequest;
 use App\Http\Requests\VerificationRequest\RejectVerificationRequest;
+use App\Http\Requests\VerificationRequest\SearchVerificationRequest;
 use App\Http\Requests\VerificationRequest\StoreVerificationFormRequest;
 use App\Http\Requests\VerificationRequest\UpdateVerificationFormRequest;
 use App\Http\Responses\ApiResponse;
@@ -81,6 +82,23 @@ class VerificationController extends Controller
             return ApiResponse::error($data,$message);
         }
     }
+    public function searchByNationalId(SearchVerificationRequest $request)
+    {
+        $data=[];
+        $data=[];
+        try{
+
+            $data=$this->verificationService->SearchByNationalId($request->validated());
+            return  ApiResponse::success($data['data'],$data['message'],$data['code']);
+        }
+        catch (Throwable $th){
+
+            $message=$th->getMessage();
+            return ApiResponse::error($data,$message);
+        }
+
+    }
+
 //
 
     //for admins

@@ -71,6 +71,8 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::get('/{id}', 'show')->name('show');
             Route::post('/store', 'store')->name('store');
             Route::post('/update', 'update')->name('update');
+            Route::post('/SearchByNationalId','SearchByNationalId')->name('SearchByNationalId');
+
 //            Route::delete('/{id}', 'destroy')->name('destroy');
 
             // Admin routes
@@ -141,7 +143,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::get('/{serviceId}/dashboard', [AdminQueueController::class, 'dashboard']);
         Route::post('/{serviceId}/add-manual', [AdminQueueController::class, 'addManual']);
         Route::post('/{serviceId}/call-next', [AdminQueueController::class, 'callNext']);
-        
+
         Route::post('/tickets/{ticketId}/serve', [AdminQueueController::class, 'markAsServed']);
         Route::post('/tickets/{ticketId}/no-show', [AdminQueueController::class, 'markAsNoShow']);
         Route::post('/tickets/{ticketId}/return', [AdminQueueController::class, 'returnToQueue']);

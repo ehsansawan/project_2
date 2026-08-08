@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class ComplainService
 {
-    use PictureTrait; 
+    use PictureTrait;
 
     private ComplainRepository $complainRepository;
 
@@ -38,14 +38,14 @@ class ComplainService
             if (isset($validatedData['media'])) {
                 foreach ($validatedData['media'] as $file) {
                     $isVideo = str_starts_with($file->getMimeType(), 'video/');
-                    
+
                     // تحديد المجلد بناءً على النوع (صور أم فيديو)
                     $directory = $isVideo ? 'complains/videos' : 'complains/images';
                     $type = $isVideo ? 'video' : 'image';
-                    
+
                     // استدعاء الدالة من الـ Trait (سطر واحد فقط!)
                     $path = self::storePicture($file, $directory);
-                    
+
                     $mediaPaths[] = [
                         'file_path' => $path, // المسار النسبي سيُحفظ في الـ DB
                         'media_type' => $type,
@@ -80,4 +80,6 @@ class ComplainService
             ];
         });
     }
+
+
 }

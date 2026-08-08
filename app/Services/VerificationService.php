@@ -260,6 +260,39 @@ class VerificationService
             ];
         }
     }
+    public function searchByNationalId($request)
+    {
+        $user = auth()->user();
 
+        $nationalId = trim($request['national_id'] ?? '');
+
+        if ($nationalId === '') {
+            return [
+                'data' => null,
+                'message' => 'national_id is required.',
+                'code' => 422,
+            ];
+        }
+
+        $verificationRequests = $user->verificationRequests()
+            ->with('images')
+            ->where('national_id', $nationalId)
+            ->latest()
+            ->get();
+
+        if ($verificationRequests->isEmpty()) {
+            return [
+                'data' => $verificationRequests,
+                'message' => 'No verification request found with this national id.',
+                'code' => 404,
+            ];
+        }
+
+        return [
+            'data' => $verificationRequests,
+            'message' => 'Verification requests retrieved successfully.',
+            'code' => 200,
+        ];
+    }
 
 }
