@@ -103,10 +103,13 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         ->prefix("complains")
         ->group(function () {
             Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
-            Route::get("/","index");
-            Route::get("/{complainId}","show");
-            Route::put("/{complainId}","update");
-            Route::delete("/{complainId}","destroy");
+            // عرض الشكاوى
+            Route::get('/complains', [ComplainController::class, 'index'])->middleware(VerifiedEmail::class);
+            Route::get('/my-complains', [ComplainController::class, 'myComplains'])->middleware(VerifiedEmail::class);
+
+            // التصويت
+            Route::post('/vote', [ComplainController::class, 'vote'])->middleware(VerifiedEmail::class);
+            Route::delete('/vote', [ComplainController::class, 'unvote'])->middleware(VerifiedEmail::class)  ;
     });
 
     Route::controller(ReportController::class)

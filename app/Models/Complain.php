@@ -59,4 +59,8 @@ class Complain extends Model
     {
         return $this->hasMany(ComplainMedia::class);
     }
+      public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }
