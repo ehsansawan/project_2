@@ -16,6 +16,7 @@ class Complain extends Model
         'type',
         'category_id',
         'status',
+        'decision_reason',
         'priority_score',
         'pin_id',
     ];
@@ -58,5 +59,9 @@ class Complain extends Model
     public function media()
     {
         return $this->hasMany(ComplainMedia::class);
+    }
+      public function reports()
+    {
+        return $this->hasMany(Report::class);
     }
 }
