@@ -16,6 +16,7 @@ class Complain extends Model
         'type',
         'category_id',
         'status',
+        'decision_reason',
         'priority_score',
         'pin_id',
     ];

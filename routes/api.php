@@ -15,6 +15,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\QueueController;
 use App\Http\Controllers\AdminQueueController;
 use App\Http\Controllers\ArchiveStatisticsController;
+use App\Http\Controllers\AdminComplainController;
 
 
 
@@ -160,4 +161,14 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::get('/services/{serviceId}', [ArchiveStatisticsController::class, 'serviceStats']);
         Route::get('/employees', [ArchiveStatisticsController::class, 'employeeStats']);
         Route::get('/history', [ArchiveStatisticsController::class, 'history']);
+    });
+
+
+
+    // مسارات إدارة الشكاوى (للمسؤولين - تحتاج تسجيل دخول + صلاحيات موظف)
+    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/complains')->group(function () {
+        Route::get('/', [AdminComplainController::class, 'index']);
+        Route::get('/{id}', [AdminComplainController::class, 'show']);
+        Route::put('/{id}/review', [AdminComplainController::class, 'review']);
+        Route::put('/{id}/status', [AdminComplainController::class, 'updateStatus']);
     });
