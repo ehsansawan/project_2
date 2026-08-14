@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum CertificateStutus:string
+enum CertificateStatus:string
 {
     //
     case Pending = 'pending';

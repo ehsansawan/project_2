@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\VerificationRequest;
+namespace App\Http\Requests;
 
-use App\Enums\VerificationStatus;
+use App\Enums\CertificateStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class AdminIndexRequest extends FormRequest
+class getCertificateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,10 +25,9 @@ class AdminIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['sometimes', 'array'],
-            'status.*' => [
-                Rule::enum(VerificationStatus::class),
-            ],
+            //
+            'status'=>['sometimes','array'],
+            'status.*'=>[Rule::enum(CertificateStatus::class)],
         ];
     }
 

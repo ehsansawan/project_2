@@ -42,4 +42,20 @@ class UpdateVerificationFormRequest extends FormRequest
 
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'id.required' => 'Verification request ID is required',
+            'id.exists' => 'Verification request not found',
+            'national_id.regex' => 'National ID must be exactly 11 digits',
+            'national_id.unique' => 'This National ID is already registered',
+            'images_to_delete.array' => 'Images to delete must be a list',
+            'images_to_delete.*.exists' => 'One of the selected images does not exist',
+            'images_to_upload.array' => 'Images must be a list of files',
+            'images_to_upload.*.image' => 'Each image must be a valid image file',
+            'images_to_upload.*.mimes' => 'Unsupported image format. Allowed: JPG, JPEG, PNG, WEBP',
+            'images_to_upload.*.max' => 'Image size must not exceed 4MB',
+        ];
+    }
 }

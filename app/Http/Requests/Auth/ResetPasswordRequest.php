@@ -33,4 +33,15 @@ class ResetPasswordRequest extends FormRequest
                 ->symbols()]
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'code.required' => 'Reset code is required',
+            'code.exists' => 'The reset code is invalid or expired',
+            'password.required' => 'Password is required',
+            'password.confirmed' => 'Password confirmation does not match',
+            'password.uncompromised' => 'This password has been compromised',
+        ];
+    }
 }

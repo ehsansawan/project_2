@@ -39,4 +39,17 @@ class RejectVerificationRequest extends FormRequest
             'id' => $this->route('id'),
         ]);
     }
+
+    public function messages(): array
+    {
+        return [
+            'id.required' => 'Verification request ID is required',
+            'id.exists' => 'Verification request not found',
+            'reason.required' => 'Please select at least one rejection reason',
+            'reason.array' => 'Reasons must be a list',
+            'reason.min' => 'Please select at least one rejection reason',
+            'reason.*.enum' => 'One of the selected reasons is invalid',
+            'description.max' => 'Description may not be greater than 1000 characters',
+        ];
+    }
 }

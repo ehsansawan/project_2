@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Responses\ApiResponse;
 use App\Services\ProfileService;
-use Illuminate\Http\Request;
 use Throwable;
 
 class ProfileController extends Controller

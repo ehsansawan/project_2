@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             //$table->text('description')->nullable();
             $table->integer('citizenship_score')->default(0);
-            $table->decimal('credibility_score', 5, 2)->default(0);
+            $table->decimal('credibility_score', 50, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

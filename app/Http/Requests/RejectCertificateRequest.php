@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\AccountStatus;
+use App\Enums\CertificateRejectionReason;
+use App\Enums\RejectionReason;
+use App\Services\CertificateService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateProfileRequest extends FormRequest
+class RejectCertificateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,13 +26,17 @@ class UpdateProfileRequest extends FormRequest
      */
     public function rules(): array
     {
-        $canEditIdentity = auth()->user()->account_status === AccountStatus::Visitor->value;
-
         return [
-            'birth_date' => [Rule::when($canEditIdentity, 'date', 'prohibited')],
-            'first_name' => [Rule::when($canEditIdentity, 'string', 'prohibited'), 'max:255'],
-            'last_name' => [Rule::when($canEditIdentity, 'string', 'prohibited'), 'max:255'],
-            'image'=>'nullable|image|mimes:jpeg,jpg,png,webp|max:4096'
+            //
+            'rejection_reason'=>['required',Rule::enum(CertificateRejectionReason::class)]
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'rejection_reason.required' => 'Rejection reason is required',
+            'rejection_reason.enum' => 'The selected rejection reason is invalid',
         ];
     }
 }

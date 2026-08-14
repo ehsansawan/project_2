@@ -20,4 +20,16 @@ class UpdateServiceRequest extends FormRequest
             'status' => 'sometimes|in:active,paused,closed',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.min' => 'Service name must be at least 3 characters',
+            'name.max' => 'Service name may not be greater than 255 characters',
+            'prefix.size' => 'Prefix must be exactly 1 character',
+            'estimated_time_minutes.min' => 'Estimated time must be at least 1 minute',
+            'estimated_time_minutes.max' => 'Estimated time may not be greater than 120 minutes',
+            'status.in' => 'Status must be one of: active, paused, closed',
+        ];
+    }
 }
