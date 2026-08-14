@@ -29,4 +29,8 @@ class AuditLog extends Model
     {
         return $this->morphTo();
     }
+    public function userCertificate()
+    {
+        return $this->belongsTo(UserCertificate::class);
+    }
 }

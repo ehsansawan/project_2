@@ -34,4 +34,18 @@ class StoreVerificationFormRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'national_id.required' => 'National ID is required',
+            'national_id.regex' => 'National ID must be exactly 11 digits',
+            'national_id.unique' => 'This National ID is already registered',
+            'images.required' => 'Please upload your ID image',
+            'images.array' => 'Images must be a list of files',
+            'images.size' => 'Exactly 1 image is required',
+            'images.*.image' => 'Each image must be a valid image file',
+            'images.*.mimes' => 'Unsupported image format. Allowed: JPG, JPEG, PNG, WEBP',
+            'images.*.max' => 'Image size must not exceed 4MB',
+        ];
+    }
 }

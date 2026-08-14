@@ -52,4 +52,24 @@ class RegisterRequest extends FormRequest
 
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'first_name.required' => 'First name is required',
+            'first_name.max' => 'First name may not be greater than 255 characters',
+            'last_name.required' => 'Last name is required',
+            'last_name.max' => 'Last name may not be greater than 255 characters',
+            'email.required' => 'Email is required',
+            'email.email' => 'Please enter a valid email address',
+            'email.max' => 'Email may not be greater than 255 characters',
+            'email.unique' => 'This email is already registered',
+            'phone.regex' => 'Phone number must be 09XXXXXXXX',
+            'password.required' => 'Password is required',
+            'password.confirmed' => 'Password confirmation does not match',
+            'password.uncompromised' => 'This password has been compromised',
+            'birth_date.required' => 'Birth date is required',
+            'birth_date.date' => 'Please enter a valid birth date',
+        ];
+    }
 }

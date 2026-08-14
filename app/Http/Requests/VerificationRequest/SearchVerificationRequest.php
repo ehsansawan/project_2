@@ -18,4 +18,12 @@ class SearchVerificationRequest extends FormRequest
             'national_id' => 'required|string|digits:11',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'national_id.required' => 'National ID is required',
+            'national_id.digits' => 'National ID must be exactly 11 digits',
+        ];
+    }
 }

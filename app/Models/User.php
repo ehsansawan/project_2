@@ -12,7 +12,8 @@ use Illuminate\Notifications\Notifiable;
  use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations;
 
- class User extends Authenticatable implements JWTSubject,MustVerifyEmail
+ class User extends
+     Authenticatable implements JWTSubject,MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasApiTokens,SoftDeletes;

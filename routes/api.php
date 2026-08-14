@@ -15,6 +15,8 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\QueueController;
 use App\Http\Controllers\AdminQueueController;
 use App\Http\Controllers\ArchiveStatisticsController;
+use App\Http\Controllers\UserSkillController;
+use App\Http\Controllers\UserCertificateController;
 
 
 
@@ -91,6 +93,36 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::get('/','index')->name('index');
             Route::get('/show/{id}', 'show')->name('show');
             Route::post('/update', 'update')->name('update');
+        });
+
+    // User skills routes
+    Route::controller(UserSkillController::class)->prefix('skill')
+        ->name('skill.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::post('/store', 'store')->name('store');
+            Route::post('/update/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+    // User certificates routes
+    Route::controller(UserCertificateController::class)->prefix('certificate')
+        ->name('certificate.')
+        ->group(function () {
+            // for users
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::post('/store', 'store')->name('store');
+            Route::post('/update/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+
+            // for admins
+            Route::post('/adminIndex', 'getCertificates')->name('adminIndex');
+            Route::get('/adminShow/{id}', 'getCertificate')->name('adminShow');
+            Route::get('/adminIndexByUser/{user_id}', 'getUserCertificates')->name('adminIndexByUser');
+            Route::get('/approve/{id}', 'approve')->name('approve');
+            Route::post('/reject/{id}', 'reject')->name('reject');
         });
 
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\VerificationRequest;
+namespace App\Http\Requests\Skill;
 
-use App\Enums\VerificationStatus;
+use App\Enums\SkillType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
-class AdminIndexRequest extends FormRequest
+class UpdateSkillRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,18 +25,17 @@ class AdminIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['sometimes', 'array'],
-            'status.*' => [
-                Rule::enum(VerificationStatus::class),
-            ],
+            //
+            'name'=>'string',
+            'type'=>[new Enum(SkillType::class)],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'status.array' => 'Status must be a list',
-            'status.*.enum' => 'One of the selected statuses is invalid',
+            'name.string' => 'Skill name must be a string',
+            'type.enum' => 'The selected skill type is invalid',
         ];
     }
 }
