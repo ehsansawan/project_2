@@ -32,8 +32,12 @@ class Report extends Model
     {
         return $this->belongsTo(Complain::class);
     }
-    public function type()
+    public function reportType()
     {
         return $this->belongsTo(ReportType::class, 'type_id');
+    }
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

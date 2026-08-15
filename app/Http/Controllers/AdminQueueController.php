@@ -24,7 +24,7 @@ class AdminQueueController extends Controller
             $result = $this->adminQueueService->getDashboard($serviceId, $employeeId);
             return ApiResponse::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
-            return ApiResponse::error([], $th->getMessage(), $th->getCode() ?: 500);
+            return ApiResponse::error([], $th->getMessage(), 500);
         }
     }
 
@@ -35,7 +35,7 @@ class AdminQueueController extends Controller
             $result = $this->adminQueueService->addManualVisitor($serviceId, $employeeId, $request->validated());
             return ApiResponse::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
-            return ApiResponse::error([], $th->getMessage(), $th->getCode() ?: 500);
+            return ApiResponse::error([], $th->getMessage(),500);
         }
     }
 
@@ -46,7 +46,7 @@ class AdminQueueController extends Controller
             $result = $this->adminQueueService->callNext($serviceId, $employeeId);
             return ApiResponse::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
-            return ApiResponse::error([], $th->getMessage(), $th->getCode() ?: 500);
+            return ApiResponse::error([], $th->getMessage(),500);
         }
     }
 
@@ -57,7 +57,7 @@ class AdminQueueController extends Controller
             $result = $this->adminQueueService->markAsServed($ticketId, $employeeId);
             return ApiResponse::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
-            return ApiResponse::error([], $th->getMessage(), $th->getCode() ?: 500);
+            return ApiResponse::error([], $th->getMessage(),500);
         }
     }
 
@@ -68,7 +68,7 @@ class AdminQueueController extends Controller
             $result = $this->adminQueueService->markAsNoShow($ticketId, $employeeId);
             return ApiResponse::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
-            return ApiResponse::error([], $th->getMessage(), $th->getCode() ?: 500);
+            return ApiResponse::error([], $th->getMessage(), 500);
         }
     }
 
@@ -79,7 +79,7 @@ class AdminQueueController extends Controller
             $result = $this->adminQueueService->returnToQueue($ticketId, $employeeId);
             return ApiResponse::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
-            return ApiResponse::error([], $th->getMessage(), $th->getCode() ?: 500);
+            return ApiResponse::error([], $th->getMessage(),500);
         }
     }
 }

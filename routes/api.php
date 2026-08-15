@@ -17,6 +17,7 @@ use App\Http\Controllers\AdminQueueController;
 use App\Http\Controllers\ArchiveStatisticsController;
 use App\Http\Controllers\UserSkillController;
 use App\Http\Controllers\UserCertificateController;
+use App\Http\Controllers\AdminComplainController;
 
 
 
@@ -87,7 +88,6 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
 
         });
 
-    //profile
     Route::controller(ProfileController::class)->prefix('profile')
         ->name('profile.')
         ->group(function () {
@@ -137,13 +137,19 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         ->name('complain.')
         ->group(function () {
             Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
-            Route::get("/","index")->name('index');
+            // عرض الشكاوى
+            Route::get('/complains', [ComplainController::class, 'index'])->middleware(VerifiedEmail::class)->name('index');
+            Route::get('/my-complains', [ComplainController::class, 'myComplains'])->middleware(VerifiedEmail::class)->name('myComplains');
+
+            // التصويت
+            Route::post('/vote', [ComplainController::class, 'vote'])->middleware(VerifiedEmail::class)->name('vote');
+            Route::delete('/vote', [ComplainController::class, 'unvote'])->middleware(VerifiedEmail::class)->name('unvote');  ;
+         //   Route::get("/","index")->name('index');
             Route::get("/{complainId}","show")->name('show');
             Route::put("/{complainId}","update")->name('update');
             Route::delete("/{complainId}","destroy")->name('destroy');
     });
 
-    // reports
     Route::controller(ReportController::class)
         ->prefix("reports")
         ->name('report.')
@@ -203,4 +209,16 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::get('/services/{serviceId}', [ArchiveStatisticsController::class, 'serviceStats'])->name('serviceStats') ;
         Route::get('/employees', [ArchiveStatisticsController::class, 'employeeStats'])->name('employeeStats') ;
         Route::get('/history', [ArchiveStatisticsController::class, 'history'])->name('history') ;
+    });
+
+
+
+    // مسارات إدارة الشكاوى (للمسؤولين - تحتاج تسجيل دخول + صلاحيات موظف)
+    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/complains')
+        ->name('admin.complains.')
+        ->group(function () {
+        Route::get('/', [AdminComplainController::class, 'index'])->name('index');
+        Route::get('/{id}', [AdminComplainController::class, 'show'])->name('show');
+        Route::put('/{id}/review', [AdminComplainController::class, 'review'])->name('review') ;
+        Route::put('/{id}/status', [AdminComplainController::class, 'updateStatus'])->name('status') ;
     });

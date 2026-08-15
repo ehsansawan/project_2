@@ -8,9 +8,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ComplainCategory extends Model
 {
     use SoftDeletes;
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'weight'];
 
-    public function complain()
+    protected $casts = [
+        'weight' => 'decimal:2',
+    ];
+
+    public function complains()
     {
         return $this->hasMany(Complain::class, 'category_id');
     }

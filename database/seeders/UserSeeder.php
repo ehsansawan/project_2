@@ -34,8 +34,7 @@ class UserSeeder extends Seeder
         //Define permissions (every permission) for super admin
 
         $permissions = [
-
-            // ===== المواطن =====
+            // ===== المواطن (client) =====
             'profile.index',
             'profile.show',
             'profile.update',
@@ -60,6 +59,9 @@ class UserSeeder extends Seeder
 
             'complain.store',
             'complain.index',
+            'complain.myComplains',
+            'complain.vote',
+            'complain.unvote',
             'complain.show',
             'complain.update',
             'complain.destroy',
@@ -70,7 +72,7 @@ class UserSeeder extends Seeder
             'queue.join',
             'queue.info',
 
-            // ===== الأدمن =====
+            // ===== الأدمن (Admin) =====
             'verification.adminIndex',
             'verification.adminShow',
             'verification.adminIndexByUser',
@@ -98,10 +100,15 @@ class UserSeeder extends Seeder
             'admin.queue.markAsNoShow',
             'admin.queue.returnToQueue',
 
-            'admin.statistics.overview',
-            'admin.statistics.serviceStats',
-            'admin.statistics.employeeStats',
-            'admin.statistics.history',
+            'admin.queue.statistics.overview',
+            'admin.queue.statistics.serviceStats',
+            'admin.queue.statistics.employeeStats',
+            'admin.queue.statistics.history',
+
+            'admin.complains.index',
+            'admin.complains.show',
+            'admin.complains.review',
+            'admin.complains.status',
         ];
 
         $admin_permissions = [
@@ -132,10 +139,15 @@ class UserSeeder extends Seeder
             'admin.queue.markAsNoShow',
             'admin.queue.returnToQueue',
 
-            'admin.statistics.overview',
-            'admin.statistics.serviceStats',
-            'admin.statistics.employeeStats',
-            'admin.statistics.history',
+            'admin.queue.statistics.overview',
+            'admin.queue.statistics.serviceStats',
+            'admin.queue.statistics.employeeStats',
+            'admin.queue.statistics.history',
+
+            'admin.complains.index',
+            'admin.complains.show',
+            'admin.complains.review',
+            'admin.complains.status',
         ];
 
         $client_permissions = [
@@ -163,6 +175,9 @@ class UserSeeder extends Seeder
 
             'complain.store',
             'complain.index',
+            'complain.myComplains',
+            'complain.vote',
+            'complain.unvote',
             'complain.show',
             'complain.update',
             'complain.destroy',
@@ -173,6 +188,7 @@ class UserSeeder extends Seeder
             'queue.join',
             'queue.info',
         ];
+
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission,'api');
         }
