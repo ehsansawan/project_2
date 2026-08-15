@@ -87,6 +87,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
 
         });
 
+    //profile
     Route::controller(ProfileController::class)->prefix('profile')
         ->name('profile.')
         ->group(function () {
@@ -133,60 +134,73 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
     //complains routes
     Route::controller(ComplainController::class)
         ->prefix("complains")
+        ->name('complain.')
         ->group(function () {
             Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
-            Route::get("/","index");
-            Route::get("/{complainId}","show");
-            Route::put("/{complainId}","update");
-            Route::delete("/{complainId}","destroy");
+            Route::get("/","index")->name('index');
+            Route::get("/{complainId}","show")->name('show');
+            Route::put("/{complainId}","update")->name('update');
+            Route::delete("/{complainId}","destroy")->name('destroy');
     });
 
+    // reports
     Route::controller(ReportController::class)
         ->prefix("reports")
+        ->name('report.')
         ->group(function(){
             Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware(VerifiedEmail::class);
         });
 
 
     // مسارات قائمة الانتظار
-    Route::prefix('queue')->group(function () {
-        Route::get('/services/{serviceId}', [QueueController::class, 'showService']);
-        Route::post('/join', [QueueController::class, 'join']);
+    Route::prefix('queue')
+        ->name('queue.')
+        ->group(function () {
+        Route::get('/services/{serviceId}', [QueueController::class, 'showService'])->name('showService');
+        Route::post('/join', [QueueController::class, 'join'])->name('join');
     });
 
     // مسارات عامة (للمواطنين - بدون تسجيل دخول)
-    Route::prefix('queue')->group(function () {
-        Route::get('/info/{qrCodeString}', [ServiceController::class, 'getQueueInfo']);
+    Route::prefix('queue')
+    ->name('queue.')
+        ->group(function () {
+        Route::get('/info/{qrCodeString}', [ServiceController::class, 'getQueueInfo'])->name('info');
     });
 
     // مسارات الأدمن (لإدارة الخدمات - تحتاج تسجيل دخول + صلاحيات موظف)
-    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/services')->group(function () {
-        Route::get('/', [ServiceController::class, 'index']);
-        Route::get('/{id}', [ServiceController::class, 'show']);
-        Route::post('/', [ServiceController::class, 'store']);
-        Route::put('/{id}', [ServiceController::class, 'update']);
-        Route::delete('/{id}', [ServiceController::class, 'destroy']);
-        Route::post('/{serviceId}/assign-employee', [ServiceController::class, 'assignEmployee']);
-        Route::delete('/{serviceId}/unassign-employee/{employeeId}', [ServiceController::class, 'unassignEmployee']);
+    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/services')
+        ->name('admin.services.')
+        ->group(function () {
+        Route::get('/', [ServiceController::class, 'index'])->name('index');
+        Route::get('/{id}', [ServiceController::class, 'show'])->name('show');
+        Route::post('/', [ServiceController::class, 'store'])->name('store');
+        Route::put('/{id}', [ServiceController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ServiceController::class, 'destroy'])->name('destroy');
+        Route::post('/{serviceId}/assign-employee', [ServiceController::class, 'assignEmployee'])->name('assignEmployee');
+        Route::delete('/{serviceId}/unassign-employee/{employeeId}', [ServiceController::class, 'unassignEmployee'])->name('unassignEmployee');
     });
 
     // مسارات إدارة قائمة الانتظار (للمسؤولين - تحتاج تسجيل دخول + صلاحيات موظف)
-    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/queue')->group(function () {
-        Route::get('/{serviceId}/dashboard', [AdminQueueController::class, 'dashboard']);
-        Route::post('/{serviceId}/add-manual', [AdminQueueController::class, 'addManual']);
-        Route::post('/{serviceId}/call-next', [AdminQueueController::class, 'callNext']);
+    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/queue')
+        ->name('admin.queue.')
+        ->group(function () {
+        Route::get('/{serviceId}/dashboard', [AdminQueueController::class, 'dashboard'])->name('dashboard');
+        Route::post('/{serviceId}/add-manual', [AdminQueueController::class, 'addManual'])->name('addManual') ;
+        Route::post('/{serviceId}/call-next', [AdminQueueController::class, 'callNext'])->name('callNext') ;
 
-        Route::post('/tickets/{ticketId}/serve', [AdminQueueController::class, 'markAsServed']);
-        Route::post('/tickets/{ticketId}/no-show', [AdminQueueController::class, 'markAsNoShow']);
-        Route::post('/tickets/{ticketId}/return', [AdminQueueController::class, 'returnToQueue']);
+        Route::post('/tickets/{ticketId}/serve', [AdminQueueController::class, 'markAsServed'])->name('markAsServed') ;
+        Route::post('/tickets/{ticketId}/no-show', [AdminQueueController::class, 'markAsNoShow'])->name('markAsNoShow') ;
+        Route::post('/tickets/{ticketId}/return', [AdminQueueController::class, 'returnToQueue'])->name('returnToQueue') ;
     });
 
 
 
     // مسارات إحصائيات قائمة الانتظار المؤرشفة (للمسؤولين - تحتاج تسجيل دخول + صلاحيات موظف)
-    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/queue/statistics')->group(function () {
-        Route::get('/overview', [ArchiveStatisticsController::class, 'overview']);
-        Route::get('/services/{serviceId}', [ArchiveStatisticsController::class, 'serviceStats']);
-        Route::get('/employees', [ArchiveStatisticsController::class, 'employeeStats']);
-        Route::get('/history', [ArchiveStatisticsController::class, 'history']);
+    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/queue/statistics')
+        ->name('admin.queue.statistics.')
+        ->group(function () {
+        Route::get('/overview', [ArchiveStatisticsController::class, 'overview'])->name('overview') ;
+        Route::get('/services/{serviceId}', [ArchiveStatisticsController::class, 'serviceStats'])->name('serviceStats') ;
+        Route::get('/employees', [ArchiveStatisticsController::class, 'employeeStats'])->name('employeeStats') ;
+        Route::get('/history', [ArchiveStatisticsController::class, 'history'])->name('history') ;
     });

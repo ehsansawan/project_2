@@ -11,12 +11,13 @@ use Illuminate\Notifications\Notifiable;
  use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations;
+ use Spatie\Permission\Traits\HasRoles;
 
  class User extends
      Authenticatable implements JWTSubject,MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens,SoftDeletes;
+    use HasFactory, Notifiable, HasApiTokens,SoftDeletes,hasRoles;
 
     /**
      * The attributes that are mass assignable.
