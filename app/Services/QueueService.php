@@ -73,7 +73,7 @@ class QueueService
             return [
                 'data' => [
                     'ticket' => $ticket,
-                    'display_number' => 'A' . str_pad($newNumber, 3, '0', STR_PAD_LEFT),
+                    'display_number' => $service->prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT),
                     'people_ahead' => $waitingCount - 1,
                     'estimated_wait_time_minutes' => $estimatedWaitTime,
                 ],
