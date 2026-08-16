@@ -39,6 +39,7 @@ class UserSeeder extends Seeder
         //Define permissions (every permission) for super admin
 
         $permissions = [
+            'auth.loginAdmin',
             // ===== المواطن (client) =====
             'profile.index',
             'profile.show',
@@ -124,6 +125,7 @@ class UserSeeder extends Seeder
         ];
 
         $admin_permissions = [
+            'auth.loginAdmin',
             'verification.adminIndex',
             'verification.adminShow',
             'verification.adminIndexByUser',

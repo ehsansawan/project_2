@@ -58,6 +58,7 @@ Route::controller(AuthController::class)->prefix('auth')
 
         Route::post('/register', 'register')->name('register');
         Route::post('/login', 'login')->name('login');
+        Route::post('/admin/login','login')->name('loginAdmin')->middleware('can:auth.loginAdmin');
         Route::middleware('auth:api')->post('/logout', 'logout')->name('logout');
         Route::post('/refresh', 'refresh')->name('refresh');
         Route::post('/forgetPassword','forgetPassword')->name('forgetPassword');

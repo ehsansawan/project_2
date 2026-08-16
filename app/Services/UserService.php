@@ -24,7 +24,6 @@ class UserService
 
         return ['data' => $users, 'message' => 'users retrieved successfully', 'code' => 200];
     }
-
     public function create($request): array
     {
         $user = User::query()->create([
@@ -88,7 +87,6 @@ class UserService
 
         return ['data' => $user, 'message' => 'admin created successfully', 'code' => 201];
     }
-
     public function update($request): array
     {
         $user = auth('api')->user();

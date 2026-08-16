@@ -26,7 +26,7 @@ class ComplainService
         $status = match ($validatedData['type']) {
             'emergency' => 'published',
             'collective' => 'under_review',
-            default => 'submitted',
+            default => 'pending',
         };
 
         return DB::transaction(function () use ($validatedData, $userId, $status) {
