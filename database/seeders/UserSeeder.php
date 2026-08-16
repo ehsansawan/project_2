@@ -222,6 +222,10 @@ class UserSeeder extends Seeder
 
             'report.store',
 
+            // ===== إدارة الخدمات (Service management) =====
+            'admin.services.index',
+            'admin.services.show',
+
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',
             'user.destroy',
