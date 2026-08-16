@@ -19,6 +19,7 @@ use App\Http\Controllers\ArchiveStatisticsController;
 use App\Http\Controllers\UserSkillController;
 use App\Http\Controllers\UserCertificateController;
 use App\Http\Controllers\AdminComplainController;
+use App\Http\Controllers\ProjectController;
 
 
 
@@ -121,6 +122,20 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::post('/store', 'store')->name('store')->middleware('can:skill.store');
             Route::post('/update/{id}', 'update')->name('update')->middleware('can:skill.update');
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('can:skill.destroy');
+        });
+
+    // Project routes (employee)
+    Route::controller(ProjectController::class)->prefix('project')
+        ->name('project.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index')->middleware('can:project.index');
+            Route::get('/{id}', 'show')->name('show')->middleware('can:project.show');
+            Route::post('/create', 'store')->name('create')->middleware('can:project.create');
+            Route::post('/submit/{id}', 'submitForReview')->name('submitForReview')->middleware('can:project.submitForReview');
+            Route::post('/approve/{id}', 'approve')->name('approve')->middleware('can:project.approve');
+            Route::post('/reject/{id}', 'reject')->name('reject')->middleware('can:project.reject');
+            Route::post('/update/{id}', 'update')->name('update')->middleware('can:project.update');
+            Route::delete('/{id}', 'destroy')->name('destroy')->middleware('can:project.destroy');
         });
 
     // User certificates routes

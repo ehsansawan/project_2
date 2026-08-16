@@ -28,7 +28,7 @@ class StoreVerificationFormRequest extends FormRequest
                 'string',
                 'regex:/^[0-9]{11}$/',
                 'unique:users,national_id'],
-            'images' => 'required|array|size:1',
+            'images' => 'required|array|size:2',
             'images.*' => 'required|image|mimes:jpeg,jpg,png,webp|max:4096',
 
         ];

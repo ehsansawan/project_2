@@ -6,11 +6,17 @@ use Illuminate\Database\Seeder;
 use App\Models\Service;
 use App\Models\EmployeeService;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class ServiceSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('employee_services')->truncate();
+        DB::table('services')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         $services = [
             [
                 'name' => 'Official Documents',

@@ -122,6 +122,16 @@ class UserSeeder extends Seeder
             'user.createAdmin',
             'user.update',
             'user.destroy',
+
+            // ===== المشاريع (Projects) =====
+            'project.index',
+            'project.show',
+            'project.create',
+            'project.submitForReview',
+            'project.approve',
+            'project.reject',
+            'project.update',
+            'project.destroy',
         ];
 
         $admin_permissions = [
@@ -168,6 +178,14 @@ class UserSeeder extends Seeder
             'user.create',
             'user.update',
             'user.destroy',
+
+            // ===== المشاريع (Projects) =====
+            'project.index',
+            'project.show',
+            'project.create',
+            'project.submitForReview',
+            'project.update',
+            'project.destroy',
         ];
 
         $client_permissions = [
@@ -207,6 +225,10 @@ class UserSeeder extends Seeder
             'queue.showService',
             'queue.join',
             'queue.info',
+
+            // ===== إدارة حساب المستخدم (User's own account) =====
+            'user.update',
+            'user.destroy',
         ];
 
         foreach ($permissions as $permission) {
@@ -294,7 +316,7 @@ class UserSeeder extends Seeder
                 'phone' => '093675779' . $x,
                 'password' => Hash::make('password123' ),
                 'birth_date' => '1990-01-01',
-                'account_status' => AccountStatus::Verified->value,
+                'account_status' => AccountStatus::Visitor->value,
                 'email_verified_at' => Carbon::now(),
             ]);
 

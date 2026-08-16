@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -10,18 +11,22 @@ class Project extends Model
       use SoftDeletes;
 
     protected $fillable = [
-        'name', 'description', 'type', 'budget', 'is_votable', 'is_voluntary', 
-        'status', 'start_date', 'end_date'
+        'user_id', 'name', 'description', 'type', 'budget', 'is_votable', 'is_voluntary',
+        'is_donation', 'image_url', 'latitude', 'longitude',
+        'status', 'rejection_reason', 'start_date', 'end_date'
     ];
 
     protected $casts = [
         'type' => 'string',
         'is_votable' => 'boolean',
         'is_voluntary' => 'boolean',
-        'status' => 'string',
+        'is_donation' => 'boolean',
+        'status' => ProjectStatus::class,
         'start_date' => 'date',
         'end_date' => 'date',
         'budget' => 'decimal:2',
+        'latitude' => 'float',
+        'longitude' => 'float',
         'user_id' => 'integer',
     ];
 
