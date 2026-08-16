@@ -222,10 +222,6 @@ class UserSeeder extends Seeder
 
             'report.store',
 
-            'queue.showService',
-            'queue.join',
-            'queue.info',
-
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',
             'user.destroy',

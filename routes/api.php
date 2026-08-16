@@ -189,12 +189,12 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
 
 
     // مسارات قائمة الانتظار
-    Route::middleware(jwtMiddleware::class)->prefix('queue')
+    Route::prefix('queue')
         ->name('queue.')
         ->group(function () {
-        Route::get('/services/{serviceId}', [QueueController::class, 'showService'])->name('showService')->middleware('can:queue.showService');
-        Route::post('/join', [QueueController::class, 'join'])->name('join')->middleware('can:queue.join');
-        Route::get('/info/{qrCodeString}', [ServiceController::class, 'getQueueInfo'])->name('info')->middleware('can:queue.info');
+        Route::get('/services/{serviceId}', [QueueController::class, 'showService'])->name('showService');
+        Route::post('/join', [QueueController::class, 'join'])->name('join');
+        Route::get('/info/{qrCodeString}', [ServiceController::class, 'getQueueInfo'])->name('info');
     });
 
     // مسارات الأدمن (لإدارة الخدمات - تحتاج تسجيل دخول + صلاحيات موظف)
