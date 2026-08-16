@@ -119,6 +119,38 @@ class AuthService
         return ['user'=>$user,'message'=>$message,'code'=>$code];
 
     }
+    public function loginAdmin($request):array
+    {
+        $credentials = ['email'=>$request['email'],'password'=>$request['password']];
+        $token = Auth('api')->attempt($credentials);
+
+        if (!$token) {
+            $user=null;
+            $message = 'your email or password is wrong';
+            $code=401;
+            return ['user'=>$user,'message'=>$message,'code'=>$code];
+        }
+
+        $user = Auth('api')->user();
+
+        $userRoles = $user->getRoleNames()->toArray();
+
+        if (!in_array('admin', $userRoles) && !in_array('super-admin', $userRoles)) {
+            auth('api')->logout();
+            $user=null;
+            $message = 'You do not have admin access';
+            $code=403;
+            return ['user'=>$user,'message'=>$message,'code'=>$code];
+        }
+
+        $user['token']=  $token;
+        $user['token_type']=  'Bearer';
+        $message = 'Admin logged in successfully';
+        $code=200;
+
+        return ['user'=>$user,'message'=>$message,'code'=>$code];
+    }
+
     public function logout():array
     {
         $user=Auth('api')->user();

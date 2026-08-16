@@ -48,6 +48,18 @@ class AuthController extends Controller
             return ApiResponse::error($data,$message);
         }
     }
+    public function loginAdmin(LoginRequest $request): JsonResponse
+    {
+        $data=[];
+        try{
+            $data=$this->authService->loginAdmin($request->validated());
+            return  ApiResponse::success($data['user'],$data['message'],$data['code']);
+        }
+        catch (Throwable $th){
+            $message=$th->getMessage();
+            return ApiResponse::error($data,$message);
+        }
+    }
     public function logout(): JsonResponse
     {
         $data=[];
