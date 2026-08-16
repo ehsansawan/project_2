@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
-
+use Spatie\Permission\Models\Role;
 
 
 class AuthService
@@ -63,6 +63,24 @@ class AuthService
 
         ]);
 
+        $clientRole=Role::query()->where('name','client')->first();
+        $user->assignRole($clientRole);
+
+        //Assign permissions for user
+        $permissions=$clientRole->permissions()->pluck('name')->toArray();
+        $user->givePermissionTo($permissions);
+
+        //very important
+        // load the user's roles and permissions (research about this method)
+       // $user->load('roles','permissions');
+
+        //Reload the user instant to get updated roles and permissions
+        $user=User::query()->find($user->id);
+        //   $user=$this->appendRolesAndPermissions($user);
+
+        //very important
+        // load the user's roles and permissions (research about this method)
+      //  $user->load('roles','permissions');
 
         $message='user registered successfully';
         $code=201;

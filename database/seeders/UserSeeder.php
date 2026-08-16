@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Enums\AccountStatus;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserSeeder extends Seeder
 {
@@ -19,12 +20,16 @@ class UserSeeder extends Seeder
         //
         //create Roles
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('users')->truncate();
+        DB::table('profiles')->truncate();
         DB::table('roles')->truncate();
         DB::table('permissions')->truncate();
         DB::table('role_has_permissions')->truncate();
         DB::table('model_has_roles')->truncate();
         DB::table('model_has_permissions')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
 
         $super_admin_role=Role::create(['name' => 'super-admin']);
@@ -109,6 +114,13 @@ class UserSeeder extends Seeder
             'admin.complains.show',
             'admin.complains.review',
             'admin.complains.status',
+
+            // ===== إدارة المستخدمين (User management) =====
+            'user.index',
+            'user.create',
+            'user.createAdmin',
+            'user.update',
+            'user.destroy',
         ];
 
         $admin_permissions = [
@@ -148,6 +160,12 @@ class UserSeeder extends Seeder
             'admin.complains.show',
             'admin.complains.review',
             'admin.complains.status',
+
+            // ===== إدارة المستخدمين (Admin's user management) =====
+            'user.index',
+            'user.create',
+            'user.update',
+            'user.destroy',
         ];
 
         $client_permissions = [
@@ -193,6 +211,8 @@ class UserSeeder extends Seeder
             Permission::findOrCreate($permission,'api');
         }
 
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $super_admin_role->givePermissionTo($permissions);
         $admin_role->givePermissionTo($admin_permissions);
         $client_role->givePermissionTo($client_permissions);
@@ -219,6 +239,16 @@ class UserSeeder extends Seeder
         $permissions=$super_admin_role->permissions()->pluck('name')->toArray();
         $superAdminUser->givePermissionTo($permissions);
 
+        // profile for super admin
+        $profiles[] = [
+            'user_id' => $superAdminUser->id,
+            'image' => 'https://randomuser.me/api/portraits/men/31.jpg',
+            'citizenship_score' => 100,
+            'credibility_score' => 100,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ];
+
 // admin user
         for ( $x = 1; $x <=3 ; $x++) {
             $adminUser = User::query()->create([
@@ -238,13 +268,23 @@ class UserSeeder extends Seeder
             // Assign permissions associated with the role to the user
             $permissions = $admin_role->permissions()->pluck('name')->toArray();
             $adminUser->givePermissionTo($permissions);
+
+            // profile for admin
+            $profiles[] = [
+                'user_id' => $adminUser->id,
+                'image' => 'https://randomuser.me/api/portraits/men/' . ($x + 31) . '.jpg',
+                'citizenship_score' => 100,
+                'credibility_score' => 100,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
         }
 
 
 // client user
 
         //client
-        for ( $x = 1; $x <= 5; $x++) {
+        for ( $x = 1; $x <= 20; $x++) {
             $clientUser = User::query()->create([
                 'first_name' => 'client user ' . $x,
                 'last_name' => 'User ' . $x,
@@ -261,101 +301,19 @@ class UserSeeder extends Seeder
             // Assign permissions associated with the role to the user
             $permissions = $client_role->permissions()->pluck('name')->toArray();
             $clientUser->givePermissionTo($permissions);
+
+            // profile for client
+            $profiles[] = [
+                'user_id' => $clientUser->id,
+                'image' => 'https://randomuser.me/api/portraits/men/' . ($x + 40) . '.jpg',
+                'citizenship_score' => 50,
+                'credibility_score' => 50,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
         }
 
-        $profiles = [
-            [
-                //super admin
-                'user_id' => 1,
-                // 'profile_name' => 'Ahmad Citizen',
-                'citizenship_score' => 100,
-                'credibility_score' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //admin
-                'user_id' => 2,
-                // 'profile_name' => 'Sara Unverified',
-                // 'status' => 'unverified',
-                'citizenship_score' => 100,
-                'credibility_score' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //admin
-                'user_id' => 3,
-                // 'profile_name' => 'Omar Employee',
-                // 'status' => 'verified',
-                'citizenship_score' => 100,
-                'credibility_score' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //admin
-                'user_id' => 4,
-                // 'profile_name' => 'Mohammed Citizen',
-                // 'status' => 'verified',
-                'citizenship_score' => 100,
-                'credibility_score' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //client
-                'user_id' => 5,
-                // 'profile_name' => 'Ali Citizen',
-                // 'status' => 'verified',
-                'citizenship_score' => 50,
-                'credibility_score' => 50,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //client
-                'user_id' => 6,
-                // 'profile_name' => 'maia Citizen',
-                // 'status' => 'verified',
-                'citizenship_score' => 50,
-                'credibility_score' => 50,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //client
-                'user_id' => 7,
-                // 'profile_name' => 'Ali Citizen',
-                // 'status' => 'verified',
-                'citizenship_score' => 50,
-                'credibility_score' => 50,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //client
-                'user_id' => 8,
-                // 'profile_name' => 'maia Citizen',
-                // 'status' => 'verified',
-                'citizenship_score' => 50,
-                'credibility_score' => 50,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                //client
-                'user_id' => 9,
-                // 'profile_name' => 'Ali Citizen',
-                // 'status' => 'verified',
-                'citizenship_score' => 50,
-                'credibility_score' => 50,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-
-        ];
-
+        // Save all profiles
         DB::table('profiles')->insert($profiles);
     }
 }

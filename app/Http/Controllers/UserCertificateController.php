@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RejectCertificateRequest;
-use App\Http\Requests\StoreCertificateRequest;
-use App\Http\Requests\UpdateCertificateRequest;
-use App\Http\Requests\getCertificateRequest;
+use App\Http\Requests\Certifications\getCertificateRequest;
+use App\Http\Requests\Certifications\RejectCertificateRequest;
+use App\Http\Requests\Certifications\StoreCertificateRequest;
+use App\Http\Requests\Certifications\UpdateCertificateRequest;
 use App\Http\Responses\ApiResponse;
 use App\Services\AdminCertificateService;
 use App\Services\CertificateService;

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('image')->nullable();
             //$table->text('description')->nullable();
-            $table->integer('citizenship_score')->default(0);
+            $table->integer('citizenship_score')->default(50);
             $table->decimal('credibility_score', 50, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();

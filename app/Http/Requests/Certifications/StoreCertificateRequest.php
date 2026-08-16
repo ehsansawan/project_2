@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Certifications;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateCertificateRequest extends FormRequest
+class StoreCertificateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,14 +25,14 @@ class UpdateCertificateRequest extends FormRequest
     {
         return [
             'user_skill_id' => [
-                'sometimes',
+                'required',
                 'integer',
                 Rule::exists('user_skills', 'id')->where(function ($query) {
                     $query->where('user_id', auth()->id());
                 }),
             ],
             'file_path' => [
-                'sometimes',
+                'required',
                 'file',
                 'mimes:jpeg,jpg,png,webp,pdf',
                 'max:4096',
@@ -43,7 +43,9 @@ class UpdateCertificateRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'user_skill_id.required' => 'Skill ID is required.',
             'user_skill_id.exists' => 'The selected skill is invalid.',
+            'file_path.required' => 'Certificate file is required.',
             'file_path.mimes' => 'The certificate must be a file of type: jpeg, jpg, png, webp, pdf.',
         ];
     }

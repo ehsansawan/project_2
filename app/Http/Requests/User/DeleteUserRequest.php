@@ -1,17 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
-use App\Enums\CertificateStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class getCertificateRequest extends FormRequest
+class DeleteUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
@@ -25,17 +20,16 @@ class getCertificateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
-            'status'=>['sometimes','array'],
-            'status.*'=>[Rule::enum(CertificateStatus::class)],
+            'id' => ['required', 'integer', 'exists:users,id'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'status.array' => 'Status must be a list',
-            'status.*.enum' => 'One of the selected statuses is invalid',
+            'id.required' => 'The user id is required.',
+            'id.integer' => 'The user id must be an integer.',
+            'id.exists' => 'The user does not exist.',
         ];
     }
 }

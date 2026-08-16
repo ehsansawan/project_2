@@ -126,4 +126,9 @@ use Illuminate\Database\Eloquent\Relations;
          return $this->hasMany(Notification::class);
      }
 
+    public function audits()
+    {
+        return $this->morphMany(AuditLog::class, 'auditable');
+    }
+
 }

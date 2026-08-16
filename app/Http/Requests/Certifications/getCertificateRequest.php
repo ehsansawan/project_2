@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Certifications;
 
-use App\Enums\CertificateRejectionReason;
-use App\Enums\RejectionReason;
-use App\Services\CertificateService;
+use App\Enums\CertificateStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class RejectCertificateRequest extends FormRequest
+class getCertificateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,15 +26,16 @@ class RejectCertificateRequest extends FormRequest
     {
         return [
             //
-            'rejection_reason'=>['required',Rule::enum(CertificateRejectionReason::class)]
+            'status'=>['sometimes','array'],
+            'status.*'=>[Rule::enum(CertificateStatus::class)],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'rejection_reason.required' => 'Rejection reason is required',
-            'rejection_reason.enum' => 'The selected rejection reason is invalid',
+            'status.array' => 'Status must be a list',
+            'status.*.enum' => 'One of the selected statuses is invalid',
         ];
     }
 }
