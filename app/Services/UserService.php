@@ -14,7 +14,7 @@ class UserService
 {
     public function index($request): array
     {
-        $query = User::query()->with('roles');
+        $query = User::query()->with('roles', 'profile');
 
         if (!empty($request['roles'])) {
             $query->role($request['roles']);
@@ -83,7 +83,7 @@ class UserService
         $permissions = $adminRole->permissions()->pluck('name')->toArray();
         $user->givePermissionTo($permissions);
 
-        $user->load('roles');
+        $user->load('roles', 'profile');
 
         return ['data' => $user, 'message' => 'admin created successfully', 'code' => 201];
     }
@@ -101,7 +101,7 @@ class UserService
 
         $user->update($data);
 
-        $user->load('roles');
+        $user->load('roles', 'profile');
 
         return ['data' => $user, 'message' => 'user updated successfully', 'code' => 200];
     }

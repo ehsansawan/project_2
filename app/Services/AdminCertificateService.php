@@ -27,7 +27,7 @@ class AdminCertificateService
     public function getCertificates($request): array
     {
         $query = UserCertificate::query()
-            ->with('userSkill.user');   // أو 'user' لو أصلحت العلاقة'
+            ->with('userSkill.user.profile');   // أو 'user' لو أصلحت العلاقة'
 
         if (!empty($request['status']))
         {
@@ -45,7 +45,7 @@ class AdminCertificateService
     public function getCertificate(int $id): array
     {
         $certificate = UserCertificate::query()
-            ->with('userSkill.user')
+            ->with('userSkill.user.profile')
             ->find($id);
 
         if (!$certificate) {
@@ -67,7 +67,7 @@ class AdminCertificateService
         }
 
         $certificates = UserCertificate::query()
-            ->with(['userSkill.user'])
+            ->with(['userSkill.user.profile'])
             ->whereHas('userSkill', fn ($q) => $q->where('user_id', $userId))
             ->latest()
             ->paginate(15);
@@ -81,7 +81,7 @@ class AdminCertificateService
     public function approve(int $id): array
     {
         $certificate = UserCertificate::query()
-            ->with('userSkill.user')
+            ->with('userSkill.user.profile')
             ->find($id);
 
         if (!$certificate) {
@@ -132,7 +132,7 @@ class AdminCertificateService
         );
 
         return [
-            'data' => $certificate->fresh()->load('userSkill.user'),
+            'data' => $certificate->fresh()->load('userSkill.user.profile'),
             'message' => 'Certificate approved successfully.',
             'code' => 200,
         ];
@@ -140,7 +140,7 @@ class AdminCertificateService
     public function reject(int $id, array $request): array
     {
         $certificate = UserCertificate::query()
-            ->with('userSkill.user')
+            ->with('userSkill.user.profile')
             ->find($id);
 
         if (!$certificate) {
@@ -193,7 +193,7 @@ class AdminCertificateService
         );
 
         return [
-            'data' => $certificate->fresh()->load('userSkill.user'),
+            'data' => $certificate->fresh()->load('userSkill.user.profile'),
             'message' => 'Certificate rejected successfully.',
             'code' => 200,
         ];

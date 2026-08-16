@@ -19,7 +19,7 @@ class CertificateService
     public function index()
     {
         $user=auth()->user();
-        $ceritificate=$user->userCertificates()->with('userSkill.user')->latest()->get();
+        $ceritificate=$user->userCertificates()->with('userSkill.user.profile')->latest()->get();
 
         $message='certificates retrieved successfully';
         $code=200;
@@ -29,7 +29,7 @@ class CertificateService
     public function show($id)
     {
         $user=auth()->user();
-        $certificate=$user->userCertificates()->with('userSkill.user')->find($id);
+        $certificate=$user->userCertificates()->with('userSkill.user.profile')->find($id);
         if(!$certificate)
         {
             $message='certificate not found';

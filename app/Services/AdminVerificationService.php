@@ -86,7 +86,7 @@ class AdminVerificationService
     {
 
         $verification = VerificationRequests::query()
-            ->with('user')
+            ->with('user.profile')
             ->find($id);
 
         if(!$verification){
@@ -154,7 +154,7 @@ class AdminVerificationService
 
 
 
-            $verification->load(['user', 'images']);
+            $verification->load(['user.profile', 'images']);
 
             return [
                 'data' => $verification,
@@ -176,7 +176,7 @@ class AdminVerificationService
     public function Reject(int $id, $request)
     {
         $verification = VerificationRequests::query()
-            ->with('user')
+            ->with('user.profile')
             ->find($id);
 
         if(!$verification){
@@ -276,7 +276,7 @@ class AdminVerificationService
 
 
 
-            $verification->load(['user', 'images','rejections']);
+            $verification->load(['user.profile', 'images','rejections']);
 
             return [
                 'data' => $verification,

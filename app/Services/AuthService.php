@@ -87,6 +87,7 @@ class AuthService
 
         //jwt auth
         $token=auth('api')->login($user);
+        $user->load('profile');
         $user['token']=$token;
         $user['token_type']='bearer';
         return ['user'=>$user,'message'=>$message,'code'=>$code];
@@ -106,6 +107,7 @@ class AuthService
         }
 
         $user = Auth('api')->user();
+        $user->load('profile');
      //   $user->fcm_token=$request['fcm_token']??$user->fcm_token;
         $user->save();
         $user['token']=  $token;
@@ -143,6 +145,7 @@ class AuthService
             return ['user'=>$user,'message'=>$message,'code'=>$code];
         }
 
+        $user->load('profile');
         $user['token']=  $token;
         $user['token_type']=  'Bearer';
         $message = 'Admin logged in successfully';
@@ -186,6 +189,7 @@ class AuthService
         // استخدم الجارد jwt مباشرة
         $newToken = auth('api')->setToken($token)->refresh();
         $user=auth('api')->user();
+        $user->load('profile');
         $user['token']=  $newToken;
         $user['token_type']=  'Bearer';
         $message='User Token refreshed successfully';
@@ -320,6 +324,7 @@ class AuthService
         }
 
         $user = Auth('api')->user();
+        $user->load('profile');
         $user['token']=  $token;
         $user['token_type']=  'Bearer';
 

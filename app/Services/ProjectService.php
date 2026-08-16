@@ -40,7 +40,7 @@ class ProjectService
     }
     public function index($request): array
     {
-        $query = Project::query()->with('user');
+        $query = Project::query()->with('user.profile');
 
         if (!empty($request['statuses'])) {
             $query->whereIn('status', $request['statuses']);
@@ -52,7 +52,7 @@ class ProjectService
     }
     public function show($request): array
     {
-        $project = Project::query()->with('user')->find($request['id']);
+        $project = Project::query()->with('user.profile')->find($request['id']);
 
         if (!$project) {
             return ['data' => null, 'message' => 'project not found', 'code' => 404];

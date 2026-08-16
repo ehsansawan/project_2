@@ -9,7 +9,7 @@ class AdminComplainRepository
 {
     public function getComplains(array $filters, int $page, int $pageSize): array
     {
-        $query = Complain::with(['category', 'user', 'pin', 'media']);
+        $query = Complain::with(['category', 'user.profile', 'pin', 'media']);
 
         if (!empty($filters['type'])) {
             $query->where('type', $filters['type']);
@@ -58,7 +58,7 @@ class AdminComplainRepository
 
     public function find(int $id): ?Complain
     {
-        return Complain::with(['category', 'user', 'pin', 'media'])->find($id);
+        return Complain::with(['category', 'user.profile', 'pin', 'media'])->find($id);
     }
 
     public function update(int $id, array $data): void
@@ -97,6 +97,7 @@ class AdminComplainRepository
                 'id' => $complain->user->id,
                 'first_name' => $complain->user->first_name,
                 'last_name' => $complain->user->last_name,
+                'image' => $complain->user->profile ? $complain->user->profile->image : null,
             ] : null,
             'media' => $complain->media->map(fn ($m) => [
                 'id' => $m->id,
