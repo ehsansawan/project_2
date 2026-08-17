@@ -15,10 +15,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class AdminComplainService
 {
     private AdminComplainRepository $repository;
+    private CitizenshipService $citizenshipService; 
 
-    public function __construct(AdminComplainRepository $repository)
+    public function __construct(AdminComplainRepository $repository, CitizenshipService $citizenshipService)
     {
         $this->repository = $repository;
+        $this->citizenshipService = $citizenshipService;
     }
 
     public function list(array $filters): array
@@ -64,33 +66,25 @@ class AdminComplainService
         }
 
         $approve = $validated['action'] === 'approve';
-        $weight = (int) round((float) ($complain->category->weight ?? 0));
+        $weight = (float) ($complain->category->weight ?? 0);
 
         DB::transaction(function () use ($complain, $approve, $validated, $adminId, $weight) {
+            // 1. تحديث حالة الشكوى
             $this->repository->update($complain->id, [
                 'status' => $approve ? 'published' : 'rejected',
                 'decision_reason' => $validated['decision_reason'] ?? null,
             ]);
 
-            if ($weight !== 0) {
-                $delta = $approve ? $weight : -$weight;
-
-                $profile = Profile::where('user_id', $complain->user_id)->first();
-                if ($profile) {
-                    $profile->update([
-                        'citizenship_score' => max(0, $profile->citizenship_score + $delta),
-                    ]);
+            // 2. تحديث مؤشر المواطنة (استخدام الخدمة كما هي - بدون تعديل عليها)
+            if ($weight > 0 && $complain->user) {
+                if ($approve) {
+                    $this->citizenshipService->increase($complain->user, $weight);
+                } else {
+                    $this->citizenshipService->decrease($complain->user, $weight);
                 }
-
-                ScoreLog::create([
-                    'user_id' => $complain->user_id,
-                    'score_rule_id' => null,
-                    'point_change' => $delta,
-                    'type' => 'citizenship',
-                    'reason' => $approve ? 'Complaint approved' : 'Complaint rejected',
-                ]);
             }
 
+            // 3. تسجيل القرار في AuditLog
             AuditLog::create([
                 'user_id' => $adminId,
                 'auditable_type' => Complain::class,
@@ -98,6 +92,7 @@ class AdminComplainService
                 'action' => $approve ? 'approve' : 'reject',
             ]);
 
+            // 4. إشعار مقدم الشكوى
             Notification::create([
                 'user_id' => $complain->user_id,
                 'title' => $approve ? 'Complaint Approved' : 'Complaint Rejected',
