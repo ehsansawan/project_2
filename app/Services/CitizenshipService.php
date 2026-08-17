@@ -21,17 +21,17 @@ class CitizenshipService
         return DB::transaction(function () use ($user, $amount) {
             $profile = $this->profileOf($user);
             $current = (float) $profile->citizenship_score;
-            
+
             $factor = $this->getIncreaseFactor($current);
-            $denominator = max($current, 1); // حماية من القسمة على صفر
-            
-            $gain = ($amount / $denominator) * $factor;
+
+            // ✅ القسمة على MAX_SCORE بدلاً من القيمة الحالية
+            $gain = ($amount / self::MAX_SCORE) * $factor;
             $newScore = min(self::MAX_SCORE, $current + $gain);
-            
+
             $profile->update(['citizenship_score' => $newScore]);
-            
+
             $this->log($user, $gain, "citizenship_increase_amount_{$amount}_factor_{$factor}");
-            
+
             return $newScore;
         });
     }
@@ -45,17 +45,17 @@ class CitizenshipService
         return DB::transaction(function () use ($user, $amount) {
             $profile = $this->profileOf($user);
             $current = (float) $profile->citizenship_score;
-            
+
             $factor = $this->getDecreaseFactor($current);
-            $denominator = max(self::MAX_SCORE - $current, 1); // حماية من القسمة على صفر
-            
-            $loss = ($amount / $denominator) * $factor;
+
+            // ✅ القسمة على MAX_SCORE بدلاً من (100 - القيمة الحالية)
+            $loss = ($amount / self::MAX_SCORE) * $factor;
             $newScore = max(self::MIN_SCORE, $current - $loss);
-            
+
             $profile->update(['citizenship_score' => $newScore]);
-            
+
             $this->log($user, -$loss, "citizenship_decrease_amount_{$amount}_factor_{$factor}");
-            
+
             return $newScore;
         });
     }
