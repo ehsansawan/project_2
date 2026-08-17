@@ -105,6 +105,22 @@ class UserService
 
         return ['data' => $user, 'message' => 'user updated successfully', 'code' => 200];
     }
+    public function changePassword($request): array
+    {
+        $user = auth('api')->user();
+
+        if (!Hash::check($request['current_password'], $user->password)) {
+            return ['data' => null, 'message' => 'current password is incorrect', 'code' => 422];
+        }
+
+        $user->update([
+            'password' => Hash::make($request['new_password']),
+        ]);
+
+        $user->load('roles', 'profile');
+
+        return ['data' => $user, 'message' => 'password changed successfully', 'code' => 200];
+    }
     public function destroy($request): array
     {
         $actor = auth('api')->user();

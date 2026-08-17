@@ -79,6 +79,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::post('/create', 'create')->name('create')->middleware('can:user.create');
         Route::post('/createAdmin', 'createAdmin')->name('createAdmin')->middleware('can:user.createAdmin');
         Route::post('/update', 'update')->name('update')->middleware('can:user.update');
+        Route::post('/changePassword', 'changePassword')->name('changePassword')->middleware('can:user.changePassword');
         Route::delete('/destroy', 'destroy')->name('destroy')->middleware('can:user.destroy');
 
         });
@@ -111,6 +112,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::get('/','index')->name('index')->middleware('can:profile.index');
             Route::get('/show/{id}', 'show')->name('show')->middleware('can:profile.show');
             Route::post('/update', 'update')->name('update')->middleware('can:profile.update');
+            Route::delete('/avatar', 'destroyAvatar')->name('destroyAvatar')->middleware('can:profile.destroyAvatar');
         });
 
     // User skills routes
@@ -192,9 +194,9 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
     Route::middleware(jwtMiddleware::class)->prefix('queue')
         ->name('queue.')
         ->group(function () {
-        Route::get('/services/{serviceId}', [QueueController::class, 'showService'])->name('showService')->middleware('can:queue.showService');
-        Route::post('/join', [QueueController::class, 'join'])->name('join')->middleware('can:queue.join');
-        Route::get('/info/{qrCodeString}', [ServiceController::class, 'getQueueInfo'])->name('info')->middleware('can:queue.info');
+        Route::get('/services/{serviceId}', [QueueController::class, 'showService'])->name('showService');
+        Route::post('/join', [QueueController::class, 'join'])->name('join');
+        Route::get('/info/{qrCodeString}', [ServiceController::class, 'getQueueInfo'])->name('info');
     });
 
     // مسارات الأدمن (لإدارة الخدمات - تحتاج تسجيل دخول + صلاحيات موظف)

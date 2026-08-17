@@ -86,5 +86,36 @@ class ProfileService
        $code=200;
        return ['data'=>$profile,'message'=>$message,'code'=>$code];
     }
+    public function deleteAvatar()
+    {
+        $user=auth()->user();
+        $profile=$user->profile()->with('user')->first();
+
+        if(!$profile){
+            $message="Profile not found";
+            $code=404;
+            return ['data'=>$profile,'message'=>$message,'code'=>$code];
+        }
+
+        $image=$profile->getRawOriginal('image');
+
+        if(empty($image)){
+            $message="No avatar to delete";
+            $code=422;
+            return ['data'=>$profile,'message'=>$message,'code'=>$code];
+        }
+
+        if(!filter_var($image, FILTER_VALIDATE_URL)){
+            $this->destroyPicture($image);
+        }
+
+        $profile->update(['image'=>null]);
+
+        $profile=$user->profile()->with('user')->first();
+
+        $message="Avatar deleted successfully";
+        $code=200;
+        return ['data'=>$profile,'message'=>$message,'code'=>$code];
+    }
 
 }

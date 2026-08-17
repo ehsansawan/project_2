@@ -12,7 +12,7 @@ class Project extends Model
 
     protected $fillable = [
         'user_id', 'name', 'description', 'type', 'budget', 'is_votable', 'is_voluntary',
-        'is_donation', 'image_url', 'latitude', 'longitude',
+        'is_donation', 'latitude', 'longitude',
         'status', 'rejection_reason', 'start_date', 'end_date'
     ];
 

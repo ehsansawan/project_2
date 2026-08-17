@@ -44,6 +44,7 @@ class UserSeeder extends Seeder
             'profile.index',
             'profile.show',
             'profile.update',
+            'profile.destroyAvatar',
 
             'verification.index',
             'verification.show',
@@ -121,6 +122,7 @@ class UserSeeder extends Seeder
             'user.create',
             'user.createAdmin',
             'user.update',
+            'user.changePassword',
             'user.destroy',
 
             // ===== المشاريع (Projects) =====
@@ -136,6 +138,7 @@ class UserSeeder extends Seeder
 
         $admin_permissions = [
             'auth.loginAdmin',
+            'profile.destroyAvatar',
             'verification.adminIndex',
             'verification.adminShow',
             'verification.adminIndexByUser',
@@ -177,6 +180,7 @@ class UserSeeder extends Seeder
             'user.index',
             'user.create',
             'user.update',
+            'user.changePassword',
             'user.destroy',
 
             // ===== المشاريع (Projects) =====
@@ -192,6 +196,7 @@ class UserSeeder extends Seeder
             'profile.index',
             'profile.show',
             'profile.update',
+            'profile.destroyAvatar',
 
             'verification.index',
             'verification.show',
@@ -228,6 +233,7 @@ class UserSeeder extends Seeder
 
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',
+            'user.changePassword',
             'user.destroy',
         ];
 
