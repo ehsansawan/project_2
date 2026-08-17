@@ -52,4 +52,9 @@ class Project extends Model
     {
         return $this->hasMany(Donation::class);
     }
+
+    public function requirements()
+    {
+        return $this->hasMany(ProjectRequirement::class);
+    }
 }

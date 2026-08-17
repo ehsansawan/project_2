@@ -32,6 +32,7 @@ class ProjectService
         }
 
         $this->attachMedia($project, $request['media'] ?? []);
+
         $project->load('user.profile', 'media');
 
         return ['data' => $this->formatProject($project), 'message' => 'project created successfully', 'code' => 201];
@@ -177,7 +178,6 @@ class ProjectService
 
         return ['data' => $this->formatProject($project->load('user.profile', 'media')), 'message' => 'project rejected successfully', 'code' => 200];
     }
-
     private function attachMedia(Project $project, array $media): void
     {
         foreach ($media as $file) {
@@ -189,7 +189,6 @@ class ProjectService
             ]);
         }
     }
-
     private function replaceMedia(Project $project, array $media): void
     {
         foreach ($project->media as $oldMedia) {
@@ -200,7 +199,6 @@ class ProjectService
 
         $this->attachMedia($project, $media);
     }
-
     private function resolveMediaType(UploadedFile $file): string
     {
         $mime = $file->getMimeType();
@@ -215,7 +213,6 @@ class ProjectService
 
         return 'document';
     }
-
     private function formatProject(Project $project): Project
     {
         $project->setRelation('media', $project->media->map(function ($media) {
