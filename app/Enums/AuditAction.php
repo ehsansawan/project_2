@@ -10,5 +10,6 @@ enum AuditAction :string
     case Delete = "delete";
     case Close = "close";
     case Record = "record";
+    case Create = 'create';
 
 }

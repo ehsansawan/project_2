@@ -106,6 +106,7 @@ class UserSeeder extends Seeder
             'admin.queue.markAsServed',
             'admin.queue.markAsNoShow',
             'admin.queue.returnToQueue',
+            'admin.queue.myServices',
 
             'admin.queue.statistics.overview',
             'admin.queue.statistics.serviceStats',
@@ -146,6 +147,15 @@ class UserSeeder extends Seeder
             'project.rejectVolunteerApplication',
             'project.closeVoting',
             'project.recordDonation',
+
+
+            // ===== الأخبار (News) =====
+            'news.store',
+            'news.index',
+            'news.show',
+            'news.adminIndex',
+            'news.adminShow',
+            'news.review',
         ];
 
         $admin_permissions = [
@@ -177,7 +187,8 @@ class UserSeeder extends Seeder
             'admin.queue.markAsServed',
             'admin.queue.markAsNoShow',
             'admin.queue.returnToQueue',
-
+            'admin.queue.myServices',
+            
             'admin.queue.statistics.overview',
             'admin.queue.statistics.serviceStats',
             'admin.queue.statistics.employeeStats',
@@ -207,6 +218,9 @@ class UserSeeder extends Seeder
             'project.rejectVolunteerApplication',
             'project.closeVoting',
             'project.recordDonation',
+
+            // ===== الأخبار (News) =====
+            'news.store',
         ];
 
         $client_permissions = [
@@ -254,10 +268,17 @@ class UserSeeder extends Seeder
             'project.donationStats',
             'project.topDonors',
 
+            'admin.services.index',
+            'admin.services.show',
+
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',
             'user.changePassword',
             'user.destroy',
+
+            // ===== الأخبار (News) =====
+            'news.index',
+            'news.show',
         ];
 
         foreach ($permissions as $permission) {

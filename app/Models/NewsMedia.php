@@ -3,21 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NewsMedia extends Model
 {
-     protected $fillable = [
-        'news_id',
-        'file_path',
-        'media_type'
-    ];
+    protected $table = 'news_media';
 
-    protected $casts = [
-        'media_type' => 'string',
-    ];
+    protected $fillable = ['news_id', 'file_path', 'media_type'];
 
-    public function news()
+    public function news(): BelongsTo
     {
-        return $this->belongsTo(News::class);
+        return $this->belongsTo(News::class, 'news_id');
     }
 }

@@ -82,4 +82,20 @@ class AdminQueueController extends Controller
             return ApiResponse::error([], $th->getMessage(),500);
         }
     }
+
+    public function myServices(): JsonResponse
+    {
+        try {
+            $result = $this->adminQueueService->getEmployeeServices(auth('api')->id());
+
+            return ApiResponse::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            $code = $th->getCode();
+            return ApiResponse::error(
+                [],
+                $th->getMessage(),
+                is_int($code) && $code >= 400 && $code <= 599 ? $code : 500
+            );
+        }
+    }
 }
