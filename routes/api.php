@@ -191,7 +191,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
 
 
     // مسارات قائمة الانتظار
-    Route::middleware(jwtMiddleware::class)->prefix('queue')
+    Route::prefix('queue')
         ->name('queue.')
         ->group(function () {
         Route::get('/services/{serviceId}', [QueueController::class, 'showService'])->name('showService');
