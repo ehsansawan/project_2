@@ -24,6 +24,8 @@ class ProjectService
             'is_donation' => $request['requires_donations'] ?? false,
             'latitude' => $request['latitude'] ?? null,
             'longitude' => $request['longitude'] ?? null,
+            'budget' => $request['budget'] ?? null,
+            'voting_ends_at' => $request['voting_ends_at'] ?? null,
             'status' => 'planning',
         ]);
 
@@ -33,13 +35,17 @@ class ProjectService
 
         $this->attachMedia($project, $request['media'] ?? []);
 
-        $project->load('user.profile', 'media');
+        if (!empty($request['requirements'])) {
+            $this->syncRequirements($project, $request['requirements']);
+        }
+
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
 
         return ['data' => $this->formatProject($project), 'message' => 'project created successfully', 'code' => 201];
     }
     public function index($request): array
     {
-        $query = Project::query()->with('user.profile');
+        $query = Project::query()->with(['user.profile', 'requirements' => $this->requirementsConstraint()]);
 
         if (!empty($request['statuses'])) {
             $query->whereIn('status', $request['statuses']);
@@ -51,9 +57,20 @@ class ProjectService
 
         return ['data' => $projects, 'message' => 'projects retrieved successfully', 'code' => 200];
     }
+    public function publicIndex($request): array
+    {
+        $projects = Project::query()->public()
+            ->with(['user.profile', 'requirements' => $this->requirementsConstraint()])
+            ->latest()->paginate(15);
+
+        $projects->getCollection()->transform(fn ($project) => $this->formatProject($project));
+
+        return ['data' => $projects, 'message' => 'projects retrieved successfully', 'code' => 200];
+    }
+
     public function show($request): array
     {
-        $project = Project::query()->with('user.profile')->find($request['id']);
+        $project = Project::query()->with(['user.profile', 'requirements' => $this->requirementsConstraint()])->find($request['id']);
 
         if (!$project) {
             return ['data' => null, 'message' => 'project not found', 'code' => 404];
@@ -85,6 +102,8 @@ class ProjectService
             'is_donation' => $request['requires_donations'] ?? $project->is_donation,
             'latitude' => $request['latitude'] ?? $project->latitude,
             'longitude' => $request['longitude'] ?? $project->longitude,
+            'budget' => $request['budget'] ?? $project->budget,
+            'voting_ends_at' => $request['voting_ends_at'] ?? $project->voting_ends_at,
         ];
 
         $project->update($data);
@@ -93,8 +112,12 @@ class ProjectService
             $this->replaceMedia($project, $request['media']);
         }
 
+        if (array_key_exists('requirements', $request) && is_array($request['requirements'])) {
+            $this->syncRequirements($project, $request['requirements']);
+        }
+
         $project->refresh();
-        $project->load('user.profile', 'media');
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
 
         return ['data' => $this->formatProject($project), 'message' => 'project updated successfully', 'code' => 200];
     }
@@ -138,7 +161,9 @@ class ProjectService
 
         $project->update(['status' => ProjectStatus::Submitted]);
 
-        return ['data' => $this->formatProject($project->load('user.profile', 'media')), 'message' => 'project submitted for review successfully', 'code' => 200];
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project submitted for review successfully', 'code' => 200];
     }
     public function approve($request): array
     {
@@ -157,7 +182,9 @@ class ProjectService
             'rejection_reason' => null,
         ]);
 
-        return ['data' => $this->formatProject($project->load('user.profile', 'media')), 'message' => 'project approved successfully', 'code' => 200];
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project approved successfully', 'code' => 200];
     }
     public function reject($request): array
     {
@@ -176,7 +203,9 @@ class ProjectService
             'rejection_reason' => $request['reason'] ?? null,
         ]);
 
-        return ['data' => $this->formatProject($project->load('user.profile', 'media')), 'message' => 'project rejected successfully', 'code' => 200];
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project rejected successfully', 'code' => 200];
     }
     private function attachMedia(Project $project, array $media): void
     {
@@ -213,6 +242,21 @@ class ProjectService
 
         return 'document';
     }
+
+    /**
+     * Constrains the eager-loaded `requirements` relation to also count each
+     * requirement's currently-approved volunteers, so formatProject() can expose
+     * fill/remaining counts without triggering a query per requirement.
+     */
+    private function requirementsConstraint(): \Closure
+    {
+        return function ($query) {
+            $query->withCount(['participants as approved_count' => function ($q) {
+                $q->where('status', 'approved');
+            }]);
+        };
+    }
+
     private function formatProject(Project $project): Project
     {
         $project->setRelation('media', $project->media->map(function ($media) {
@@ -224,6 +268,44 @@ class ProjectService
             ];
         }));
 
+        if ($project->relationLoaded('requirements')) {
+            $totalRequired = 0;
+            $totalApproved = 0;
+
+            $project->setRelation('requirements', $project->requirements->map(function ($requirement) use (&$totalRequired, &$totalApproved) {
+                $approvedCount = $requirement->approved_count ?? 0;
+                $totalRequired += $requirement->required_count;
+                $totalApproved += $approvedCount;
+
+                return [
+                    'id' => $requirement->id,
+                    'skill_name' => $requirement->skill_name,
+                    'skill_type' => $requirement->skill_type,
+                    'required_count' => $requirement->required_count,
+                    'is_need_certificate' => $requirement->is_need_certificate,
+                    'approved_count' => $approvedCount,
+                    'remaining_count' => max($requirement->required_count - $approvedCount, 0),
+                ];
+            }));
+
+            $project->total_required_volunteers = $totalRequired;
+            $project->total_approved_volunteers = $totalApproved;
+        }
+
         return $project;
+    }
+
+    private function syncRequirements(Project $project, array $requirements): void
+    {
+        $project->requirements()->delete();
+
+        foreach ($requirements as $requirement) {
+            $project->requirements()->create([
+                'skill_name' => $requirement['skill_name'] ?? null,
+                'skill_type' => $requirement['skill_type'] ?? null,
+                'required_count' => $requirement['required_count'],
+                'is_need_certificate' => $requirement['is_need_certificate'] ?? false,
+            ]);
+        }
     }
 }

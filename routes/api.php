@@ -20,6 +20,7 @@ use App\Http\Controllers\UserSkillController;
 use App\Http\Controllers\UserCertificateController;
 use App\Http\Controllers\AdminComplainController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\AdminProjectController;
 
 
 
@@ -131,6 +132,8 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         ->name('project.')
         ->group(function () {
             Route::get('/', 'index')->name('index')->middleware('can:project.index');
+            Route::get('/public', 'publicIndex')->name('publicIndex')->middleware('can:project.publicIndex');
+            Route::get('/votable', 'votable')->name('votable')->middleware('can:project.votable');
             Route::get('/{id}', 'show')->name('show')->middleware('can:project.show');
             Route::post('/create', 'store')->name('create')->middleware('can:project.create');
             Route::post('/submit/{id}', 'submitForReview')->name('submitForReview')->middleware('can:project.submitForReview');
@@ -138,6 +141,11 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::post('/reject/{id}', 'reject')->name('reject')->middleware('can:project.reject');
             Route::post('/update/{id}', 'update')->name('update')->middleware('can:project.update');
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('can:project.destroy');
+            Route::post('/vote/{id}', 'vote')->name('vote')->middleware('can:project.vote');
+            Route::post('/volunteer/{id}', 'applyVolunteer')->name('applyVolunteer')->middleware('can:project.applyVolunteer');
+            Route::get('/{id}/donations', 'listDonations')->name('listDonations')->middleware('can:project.listDonations');
+            Route::get('/{id}/donations/stats', 'donationStats')->name('donationStats')->middleware('can:project.donationStats');
+            Route::get('/{id}/donations/top-donors', 'topDonors')->name('topDonors')->middleware('can:project.topDonors');
         });
 
     // User certificates routes
@@ -247,4 +255,15 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::get('/{id}', [AdminComplainController::class, 'show'])->name('show')->middleware('can:admin.complains.show');
         Route::put('/{id}/review', [AdminComplainController::class, 'review'])->name('review')->middleware('can:admin.complains.review') ;
         Route::put('/{id}/status', [AdminComplainController::class, 'updateStatus'])->name('status')->middleware('can:admin.complains.status') ;
+    });
+
+    // مسارات إدارة المشاريع (للمسؤولين - تحتاج تسجيل دخول + صلاحيات موظف)
+    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/project')
+        ->name('admin.project.')
+        ->group(function () {
+        Route::get('/{id}/volunteer-applications', [AdminProjectController::class, 'listVolunteerApplications'])->name('listVolunteerApplications')->middleware('can:project.listVolunteerApplications');
+        Route::post('/volunteer-applications/{id}/approve', [AdminProjectController::class, 'approveVolunteerApplication'])->name('approveVolunteerApplication')->middleware('can:project.approveVolunteerApplication');
+        Route::post('/volunteer-applications/{id}/reject', [AdminProjectController::class, 'rejectVolunteerApplication'])->name('rejectVolunteerApplication')->middleware('can:project.rejectVolunteerApplication');
+        Route::post('/{id}/voting/close', [AdminProjectController::class, 'forceCloseVoting'])->name('closeVoting')->middleware('can:project.closeVoting');
+        Route::post('/{id}/donations', [AdminProjectController::class, 'recordDonation'])->name('recordDonation')->middleware('can:project.recordDonation');
     });

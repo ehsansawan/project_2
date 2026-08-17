@@ -134,6 +134,18 @@ class UserSeeder extends Seeder
             'project.reject',
             'project.update',
             'project.destroy',
+            'project.publicIndex',
+            'project.votable',
+            'project.vote',
+            'project.applyVolunteer',
+            'project.listDonations',
+            'project.donationStats',
+            'project.topDonors',
+            'project.listVolunteerApplications',
+            'project.approveVolunteerApplication',
+            'project.rejectVolunteerApplication',
+            'project.closeVoting',
+            'project.recordDonation',
         ];
 
         $admin_permissions = [
@@ -190,6 +202,11 @@ class UserSeeder extends Seeder
             'project.submitForReview',
             'project.update',
             'project.destroy',
+            'project.listVolunteerApplications',
+            'project.approveVolunteerApplication',
+            'project.rejectVolunteerApplication',
+            'project.closeVoting',
+            'project.recordDonation',
         ];
 
         $client_permissions = [
@@ -226,6 +243,16 @@ class UserSeeder extends Seeder
             'complain.destroy',
 
             'report.store',
+
+            // ===== المشاريع (Projects - citizen actions) =====
+            'project.show',
+            'project.publicIndex',
+            'project.votable',
+            'project.vote',
+            'project.applyVolunteer',
+            'project.listDonations',
+            'project.donationStats',
+            'project.topDonors',
 
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',

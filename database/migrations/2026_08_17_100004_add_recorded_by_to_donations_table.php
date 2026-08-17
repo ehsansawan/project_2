@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('audit_logs', function (Blueprint $table) {
-            $table->enum('action', ['reject', 'approve', 'delete'])->change();
+        Schema::table('donations', function (Blueprint $table) {
+            $table->foreignId('recorded_by')->nullable()->after('payment')
+                ->constrained('users')->nullOnDelete();
         });
     }
 
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('audit_logs', function (Blueprint $table) {
-            $table->enum('action', ['reject', 'approve'])->change();
+        Schema::table('donations', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('recorded_by');
         });
     }
 };

@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE projects MODIFY COLUMN status 
-            ENUM('planning', 'submitted', 'approved', 'rejected', 'open', 'active', 'completed', 'cancelled') 
-            NOT NULL DEFAULT 'planning'");
+        Schema::table('projects', function (Blueprint $table) {
+            $table->enum('status', ['planning', 'submitted', 'approved', 'rejected', 'open', 'active', 'completed', 'cancelled'])
+                ->default('planning')->change();
+        });
 
         if (!Schema::hasColumn('projects', 'rejection_reason')) {
             Schema::table('projects', function (Blueprint $table) {
@@ -34,8 +34,9 @@ return new class extends Migration
             });
         }
 
-        DB::statement("ALTER TABLE projects MODIFY COLUMN status 
-            ENUM('planning', 'open', 'active', 'completed', 'cancelled') 
-            NOT NULL DEFAULT 'planning'");
+        Schema::table('projects', function (Blueprint $table) {
+            $table->enum('status', ['planning', 'open', 'active', 'completed', 'cancelled'])
+                ->default('planning')->change();
+        });
     }
 };

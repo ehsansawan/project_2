@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('project_requirements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
-            $table->string('skill_name');
-            $table->enum('skill_type', array_column(\App\Enums\SkillType::cases(), 'value'));
+            $table->string('skill_name')->nullable();
+            $table->enum('skill_type', array_column(\App\Enums\SkillType::cases(), 'value'))->nullable();
+            $table->unsignedInteger('required_count')->default(1);
             $table->boolean('is_need_certificate')->default(false);
             $table->timestamps();
         });
