@@ -218,7 +218,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::get('/{serviceId}/dashboard', [AdminQueueController::class, 'dashboard'])->name('dashboard')->middleware('can:admin.queue.dashboard');
         Route::post('/{serviceId}/add-manual', [AdminQueueController::class, 'addManual'])->name('addManual')->middleware('can:admin.queue.addManual') ;
         Route::post('/{serviceId}/call-next', [AdminQueueController::class, 'callNext'])->name('callNext')->middleware('can:admin.queue.callNext') ;
-        Route::get('/my-services', [AdminQueueController::class, 'myServices'])->name('myServices');
+        Route::get('/my-services', [AdminQueueController::class, 'myServices'])->name('myServices')->middleware('can:admin.queue.myServices');
 
         Route::post('/tickets/{ticketId}/serve', [AdminQueueController::class, 'markAsServed'])->name('markAsServed')->middleware('can:admin.queue.markAsServed') ;
         Route::post('/tickets/{ticketId}/no-show', [AdminQueueController::class, 'markAsNoShow'])->name('markAsNoShow')->middleware('can:admin.queue.markAsNoShow') ;

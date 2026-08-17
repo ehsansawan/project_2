@@ -82,4 +82,31 @@ class QueueRepository
             ->whereDate('updated_at', today())
             ->count();
     }
+
+    public function getAssignedServices(int $employeeId): array
+    {
+        $serviceIds = EmployeeService::where('employee_id', $employeeId)
+            ->where('is_active', 1)
+            ->pluck('service_id');
+
+        $services = Service::whereIn('id', $serviceIds)->get();
+
+        return $services->map(function ($service) {
+            return [
+                'id' => $service->id,
+                'name' => $service->name,
+                'prefix' => $service->prefix,
+                'qr_code_string' => $service->qr_code_string,
+                'estimated_time_minutes' => $service->estimated_time_minutes,
+                'status' => $service->status,
+                'people_waiting' => QueueTicket::where('service_id', $service->id)
+                    ->where('status', 'waiting')
+                    ->count(),
+                'served_today' => QueueTicket::where('service_id', $service->id)
+                    ->where('status', 'completed')
+                    ->whereDate('updated_at', today())
+                    ->count(),
+            ];
+        })->toArray();
+    }
 }

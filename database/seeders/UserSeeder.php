@@ -105,6 +105,7 @@ class UserSeeder extends Seeder
             'admin.queue.markAsServed',
             'admin.queue.markAsNoShow',
             'admin.queue.returnToQueue',
+            'admin.queue.myServices',
 
             'admin.queue.statistics.overview',
             'admin.queue.statistics.serviceStats',
@@ -171,7 +172,8 @@ class UserSeeder extends Seeder
             'admin.queue.markAsServed',
             'admin.queue.markAsNoShow',
             'admin.queue.returnToQueue',
-
+            'admin.queue.myServices',
+            
             'admin.queue.statistics.overview',
             'admin.queue.statistics.serviceStats',
             'admin.queue.statistics.employeeStats',

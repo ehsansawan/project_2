@@ -222,4 +222,13 @@ class AdminQueueService
         ];
     });
     }
+
+    public function getEmployeeServices(int $employeeId): array
+    {
+        return [
+            'data' => $this->queueRepository->getAssignedServices($employeeId),
+            'message' => 'Assigned services retrieved successfully',
+            'code' => 200,
+        ];
+    }
 }
