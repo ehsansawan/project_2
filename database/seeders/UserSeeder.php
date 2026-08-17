@@ -44,6 +44,7 @@ class UserSeeder extends Seeder
             'profile.index',
             'profile.show',
             'profile.update',
+            'profile.destroyAvatar',
 
             'verification.index',
             'verification.show',
@@ -122,6 +123,7 @@ class UserSeeder extends Seeder
             'user.create',
             'user.createAdmin',
             'user.update',
+            'user.changePassword',
             'user.destroy',
 
             // ===== المشاريع (Projects) =====
@@ -133,6 +135,18 @@ class UserSeeder extends Seeder
             'project.reject',
             'project.update',
             'project.destroy',
+            'project.publicIndex',
+            'project.votable',
+            'project.vote',
+            'project.applyVolunteer',
+            'project.listDonations',
+            'project.donationStats',
+            'project.topDonors',
+            'project.listVolunteerApplications',
+            'project.approveVolunteerApplication',
+            'project.rejectVolunteerApplication',
+            'project.closeVoting',
+            'project.recordDonation',
 
 
             // ===== الأخبار (News) =====
@@ -146,6 +160,7 @@ class UserSeeder extends Seeder
 
         $admin_permissions = [
             'auth.loginAdmin',
+            'profile.destroyAvatar',
             'verification.adminIndex',
             'verification.adminShow',
             'verification.adminIndexByUser',
@@ -188,6 +203,7 @@ class UserSeeder extends Seeder
             'user.index',
             'user.create',
             'user.update',
+            'user.changePassword',
             'user.destroy',
 
             // ===== المشاريع (Projects) =====
@@ -197,6 +213,11 @@ class UserSeeder extends Seeder
             'project.submitForReview',
             'project.update',
             'project.destroy',
+            'project.listVolunteerApplications',
+            'project.approveVolunteerApplication',
+            'project.rejectVolunteerApplication',
+            'project.closeVoting',
+            'project.recordDonation',
 
             // ===== الأخبار (News) =====
             'news.store',
@@ -206,6 +227,7 @@ class UserSeeder extends Seeder
             'profile.index',
             'profile.show',
             'profile.update',
+            'profile.destroyAvatar',
 
             'verification.index',
             'verification.show',
@@ -236,11 +258,22 @@ class UserSeeder extends Seeder
 
             'report.store',
 
+            // ===== المشاريع (Projects - citizen actions) =====
+            'project.show',
+            'project.publicIndex',
+            'project.votable',
+            'project.vote',
+            'project.applyVolunteer',
+            'project.listDonations',
+            'project.donationStats',
+            'project.topDonors',
+
             'admin.services.index',
             'admin.services.show',
 
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',
+            'user.changePassword',
             'user.destroy',
 
             // ===== الأخبار (News) =====

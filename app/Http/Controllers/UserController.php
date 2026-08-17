@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\ChangePasswordRequest;
 use App\Http\Requests\User\CreateAdminRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\DeleteUserRequest;
@@ -66,6 +67,18 @@ class UserController extends Controller
             return ApiResponse::error($data, $message);
         }
     }
+    public function changePassword(ChangePasswordRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->userService->changePassword($request->validated());
+            return ApiResponse::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return ApiResponse::error($data, $message);
+        }
+    }
+
     public function destroy(DeleteUserRequest $request)
     {
         $data = [];

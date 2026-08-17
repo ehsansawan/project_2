@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ProjectStatus;
 use App\Models\Project;
 use App\Traits\PictureTrait;
+use Illuminate\Http\UploadedFile;
 
 class ProjectService
 {
@@ -14,11 +15,6 @@ class ProjectService
     {
         $user = auth('api')->user();
 
-        $imageUrl = null;
-        if (!empty($request['image'])) {
-            $imageUrl = $this->storePicture($request['image'], 'uploads/projects');
-        }
-
         $project = Project::query()->create([
             'user_id' => $user->id,
             'name' => $request['name'],
@@ -26,9 +22,10 @@ class ProjectService
             'type' => 'municipal',
             'is_voluntary' => $request['requires_volunteers'] ?? false,
             'is_donation' => $request['requires_donations'] ?? false,
-            'image_url' => $imageUrl,
             'latitude' => $request['latitude'] ?? null,
             'longitude' => $request['longitude'] ?? null,
+            'budget' => $request['budget'] ?? null,
+            'voting_ends_at' => $request['voting_ends_at'] ?? null,
             'status' => 'planning',
         ]);
 
@@ -36,11 +33,19 @@ class ProjectService
             return ['data' => $project, 'message' => 'something went wrong, try again later', 'code' => 500];
         }
 
-        return ['data' => $project, 'message' => 'project created successfully', 'code' => 201];
+        $this->attachMedia($project, $request['media'] ?? []);
+
+        if (!empty($request['requirements'])) {
+            $this->syncRequirements($project, $request['requirements']);
+        }
+
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project created successfully', 'code' => 201];
     }
     public function index($request): array
     {
-        $query = Project::query()->with('user.profile');
+        $query = Project::query()->with(['user.profile', 'requirements' => $this->requirementsConstraint()]);
 
         if (!empty($request['statuses'])) {
             $query->whereIn('status', $request['statuses']);
@@ -48,17 +53,30 @@ class ProjectService
 
         $projects = $query->latest()->paginate(15);
 
+        $projects->getCollection()->transform(fn ($project) => $this->formatProject($project));
+
         return ['data' => $projects, 'message' => 'projects retrieved successfully', 'code' => 200];
     }
+    public function publicIndex($request): array
+    {
+        $projects = Project::query()->public()
+            ->with(['user.profile', 'requirements' => $this->requirementsConstraint()])
+            ->latest()->paginate(15);
+
+        $projects->getCollection()->transform(fn ($project) => $this->formatProject($project));
+
+        return ['data' => $projects, 'message' => 'projects retrieved successfully', 'code' => 200];
+    }
+
     public function show($request): array
     {
-        $project = Project::query()->with('user.profile')->find($request['id']);
+        $project = Project::query()->with(['user.profile', 'requirements' => $this->requirementsConstraint()])->find($request['id']);
 
         if (!$project) {
             return ['data' => null, 'message' => 'project not found', 'code' => 404];
         }
 
-        return ['data' => $project, 'message' => 'project retrieved successfully', 'code' => 200];
+        return ['data' => $this->formatProject($project), 'message' => 'project retrieved successfully', 'code' => 200];
     }
     public function update($request): array
     {
@@ -77,26 +95,31 @@ class ProjectService
             return ['data' => null, 'message' => 'only planning projects can be updated', 'code' => 422];
         }
 
-        $imageUrl = $project->image_url;
-        if (!empty($request['image'])) {
-            $imageUrl = $this->updatePicture($request['image'], $project->image_url, 'uploads/projects');
-        }
-
         $data = [
             'name' => $request['name'] ?? $project->name,
             'description' => $request['description'] ?? $project->description,
             'is_voluntary' => $request['requires_volunteers'] ?? $project->is_voluntary,
             'is_donation' => $request['requires_donations'] ?? $project->is_donation,
-            'image_url' => $imageUrl,
             'latitude' => $request['latitude'] ?? $project->latitude,
             'longitude' => $request['longitude'] ?? $project->longitude,
+            'budget' => $request['budget'] ?? $project->budget,
+            'voting_ends_at' => $request['voting_ends_at'] ?? $project->voting_ends_at,
         ];
 
         $project->update($data);
 
-        $project->refresh();
+        if (!empty($request['media'])) {
+            $this->replaceMedia($project, $request['media']);
+        }
 
-        return ['data' => $project, 'message' => 'project updated successfully', 'code' => 200];
+        if (array_key_exists('requirements', $request) && is_array($request['requirements'])) {
+            $this->syncRequirements($project, $request['requirements']);
+        }
+
+        $project->refresh();
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project updated successfully', 'code' => 200];
     }
     public function destroy($request): array
     {
@@ -111,9 +134,11 @@ class ProjectService
             return ['data' => null, 'message' => 'you can only delete your own project', 'code' => 403];
         }
 
-        if ($project->image_url) {
-            $this->destroyPicture($project->image_url);
+        foreach ($project->media as $media) {
+            $this->destroyPicture($media->file_path);
         }
+
+        $project->media()->delete();
 
         $project->delete();
 
@@ -136,7 +161,9 @@ class ProjectService
 
         $project->update(['status' => ProjectStatus::Submitted]);
 
-        return ['data' => $project, 'message' => 'project submitted for review successfully', 'code' => 200];
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project submitted for review successfully', 'code' => 200];
     }
     public function approve($request): array
     {
@@ -155,7 +182,9 @@ class ProjectService
             'rejection_reason' => null,
         ]);
 
-        return ['data' => $project, 'message' => 'project approved successfully', 'code' => 200];
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project approved successfully', 'code' => 200];
     }
     public function reject($request): array
     {
@@ -174,6 +203,109 @@ class ProjectService
             'rejection_reason' => $request['reason'] ?? null,
         ]);
 
-        return ['data' => $project, 'message' => 'project rejected successfully', 'code' => 200];
+        $project->load(['user.profile', 'media', 'requirements' => $this->requirementsConstraint()]);
+
+        return ['data' => $this->formatProject($project), 'message' => 'project rejected successfully', 'code' => 200];
+    }
+    private function attachMedia(Project $project, array $media): void
+    {
+        foreach ($media as $file) {
+            $path = $this->storePicture($file, 'uploads/projects');
+
+            $project->media()->create([
+                'file_path' => $path,
+                'media_type' => $this->resolveMediaType($file),
+            ]);
+        }
+    }
+    private function replaceMedia(Project $project, array $media): void
+    {
+        foreach ($project->media as $oldMedia) {
+            $this->destroyPicture($oldMedia->file_path);
+        }
+
+        $project->media()->delete();
+
+        $this->attachMedia($project, $media);
+    }
+    private function resolveMediaType(UploadedFile $file): string
+    {
+        $mime = $file->getMimeType();
+
+        if (str_starts_with($mime, 'video/')) {
+            return 'video';
+        }
+
+        if (str_starts_with($mime, 'image/')) {
+            return 'image';
+        }
+
+        return 'document';
+    }
+
+    /**
+     * Constrains the eager-loaded `requirements` relation to also count each
+     * requirement's currently-approved volunteers, so formatProject() can expose
+     * fill/remaining counts without triggering a query per requirement.
+     */
+    private function requirementsConstraint(): \Closure
+    {
+        return function ($query) {
+            $query->withCount(['participants as approved_count' => function ($q) {
+                $q->where('status', 'approved');
+            }]);
+        };
+    }
+
+    private function formatProject(Project $project): Project
+    {
+        $project->setRelation('media', $project->media->map(function ($media) {
+            return [
+                'id' => $media->id,
+                'file_path' => $media->file_path,
+                'media_type' => $media->media_type,
+                'file_url' => asset('storage/' . $media->file_path),
+            ];
+        }));
+
+        if ($project->relationLoaded('requirements')) {
+            $totalRequired = 0;
+            $totalApproved = 0;
+
+            $project->setRelation('requirements', $project->requirements->map(function ($requirement) use (&$totalRequired, &$totalApproved) {
+                $approvedCount = $requirement->approved_count ?? 0;
+                $totalRequired += $requirement->required_count;
+                $totalApproved += $approvedCount;
+
+                return [
+                    'id' => $requirement->id,
+                    'skill_name' => $requirement->skill_name,
+                    'skill_type' => $requirement->skill_type,
+                    'required_count' => $requirement->required_count,
+                    'is_need_certificate' => $requirement->is_need_certificate,
+                    'approved_count' => $approvedCount,
+                    'remaining_count' => max($requirement->required_count - $approvedCount, 0),
+                ];
+            }));
+
+            $project->total_required_volunteers = $totalRequired;
+            $project->total_approved_volunteers = $totalApproved;
+        }
+
+        return $project;
+    }
+
+    private function syncRequirements(Project $project, array $requirements): void
+    {
+        $project->requirements()->delete();
+
+        foreach ($requirements as $requirement) {
+            $project->requirements()->create([
+                'skill_name' => $requirement['skill_name'] ?? null,
+                'skill_type' => $requirement['skill_type'] ?? null,
+                'required_count' => $requirement['required_count'],
+                'is_need_certificate' => $requirement['is_need_certificate'] ?? false,
+            ]);
+        }
     }
 }

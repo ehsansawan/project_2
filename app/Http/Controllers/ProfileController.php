@@ -59,4 +59,20 @@ class ProfileController extends Controller
             return ApiResponse::error($data,$message);
         }
     }
+
+    public function destroyAvatar()
+    {
+
+        $data=[];
+        try{
+
+            $data=$this->profileService->deleteAvatar();
+            return  ApiResponse::success($data['data'],$data['message'],$data['code']);
+        }
+        catch (Throwable $th){
+
+            $message=$th->getMessage();
+            return ApiResponse::error($data,$message);
+        }
+    }
 }

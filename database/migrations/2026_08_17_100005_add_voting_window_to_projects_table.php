@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('audit_logs', function (Blueprint $table) {
-            $table->enum('action', ['reject', 'approve', 'delete'])->change();
+        Schema::table('projects', function (Blueprint $table) {
+            $table->timestamp('voting_ends_at')->nullable()->after('is_votable');
+            $table->timestamp('voting_closed_at')->nullable()->after('voting_ends_at');
         });
     }
 
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('audit_logs', function (Blueprint $table) {
-            $table->enum('action', ['reject', 'approve'])->change();
+        Schema::table('projects', function (Blueprint $table) {
+            $table->dropColumn(['voting_ends_at', 'voting_closed_at']);
         });
     }
 };
