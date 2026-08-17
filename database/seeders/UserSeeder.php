@@ -132,6 +132,15 @@ class UserSeeder extends Seeder
             'project.reject',
             'project.update',
             'project.destroy',
+
+
+            // ===== الأخبار (News) =====
+            'news.store',
+            'news.index',
+            'news.show',
+            'news.adminIndex',
+            'news.adminShow',
+            'news.review',
         ];
 
         $admin_permissions = [
@@ -186,6 +195,9 @@ class UserSeeder extends Seeder
             'project.submitForReview',
             'project.update',
             'project.destroy',
+
+            // ===== الأخبار (News) =====
+            'news.store',
         ];
 
         $client_permissions = [
@@ -222,9 +234,16 @@ class UserSeeder extends Seeder
 
             'report.store',
 
+            'admin.services.index',
+            'admin.services.show',
+
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',
             'user.destroy',
+
+            // ===== الأخبار (News) =====
+            'news.index',
+            'news.show',
         ];
 
         foreach ($permissions as $permission) {

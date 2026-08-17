@@ -20,7 +20,8 @@ use App\Http\Controllers\UserSkillController;
 use App\Http\Controllers\UserCertificateController;
 use App\Http\Controllers\AdminComplainController;
 use App\Http\Controllers\ProjectController;
-
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\AdminNewsController;
 
 
 
@@ -217,6 +218,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::get('/{serviceId}/dashboard', [AdminQueueController::class, 'dashboard'])->name('dashboard')->middleware('can:admin.queue.dashboard');
         Route::post('/{serviceId}/add-manual', [AdminQueueController::class, 'addManual'])->name('addManual')->middleware('can:admin.queue.addManual') ;
         Route::post('/{serviceId}/call-next', [AdminQueueController::class, 'callNext'])->name('callNext')->middleware('can:admin.queue.callNext') ;
+        Route::get('/my-services', [AdminQueueController::class, 'myServices'])->name('myServices');
 
         Route::post('/tickets/{ticketId}/serve', [AdminQueueController::class, 'markAsServed'])->name('markAsServed')->middleware('can:admin.queue.markAsServed') ;
         Route::post('/tickets/{ticketId}/no-show', [AdminQueueController::class, 'markAsNoShow'])->name('markAsNoShow')->middleware('can:admin.queue.markAsNoShow') ;
@@ -246,3 +248,23 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         Route::put('/{id}/review', [AdminComplainController::class, 'review'])->name('review')->middleware('can:admin.complains.review') ;
         Route::put('/{id}/status', [AdminComplainController::class, 'updateStatus'])->name('status')->middleware('can:admin.complains.status') ;
     });
+
+
+
+
+    // ===== عرض الأخبار والإعلانات (للمواطنين) =====
+    Route::controller(NewsController::class)->prefix('news')->name('news.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index')->middleware([jwtMiddleware::class, 'can:news.index']);
+            Route::get('/{id}', 'show')->name('show')->middleware([jwtMiddleware::class, 'can:news.show']);
+        });
+
+    // ===== إنشاء ومراجعة الأخبار (موظف + مدير) =====
+    Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/news')
+        ->name('admin.news.')
+        ->group(function () {
+            Route::post('/', [AdminNewsController::class, 'store'])->name('store')->middleware('can:news.store');
+            Route::get('/', [AdminNewsController::class, 'index'])->name('index')->middleware('can:news.adminIndex');
+            Route::get('/{id}', [AdminNewsController::class, 'show'])->name('show')->middleware('can:news.adminShow');
+            Route::put('/{id}/review', [AdminNewsController::class, 'review'])->name('review')->middleware('can:news.review');
+        });
