@@ -18,7 +18,9 @@ class VerificationImages extends Model
     {
         return Attribute::make(
             get: fn (?string $value) => $value
-                ? Storage::disk('public')->url($value)
+                ? (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')
+                    ? $value
+                    : Storage::disk('public')->url($value))
                 : null,
         );
     }

@@ -60,7 +60,7 @@ class SkillCertificateSeeder extends Seeder
 
                     UserCertificate::create([
                         'user_skill_id' => $skill->id,
-                        'file_path' => 'certificates/demo/' . strtolower(str_replace(' ', '-', $name)) . '-' . $client->id . '.pdf',
+                        'file_path' => "https://picsum.photos/seed/cert-{$skill->id}/700/900",
                         'status' => $status,
                         'rejection_reason' => $status === CertificateStatus::Rejected->value
                             ? CertificateRejectionReason::MissingInformation->value

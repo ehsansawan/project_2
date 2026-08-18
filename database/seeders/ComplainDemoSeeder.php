@@ -82,7 +82,7 @@ class ComplainDemoSeeder extends Seeder
             ComplainMedia::create([
                 'complain_id' => $complain->id,
                 'media_type' => 'image',
-                'file_path' => 'complains/demo/' . $complain->id . '-1.jpg',
+                'file_path' => "https://picsum.photos/seed/complain-{$complain->id}/700/450",
             ]);
 
             // A few endorsements from other clients.

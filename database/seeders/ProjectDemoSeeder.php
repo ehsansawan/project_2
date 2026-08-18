@@ -9,6 +9,7 @@ use App\Models\AuditLog;
 use App\Models\Donation;
 use App\Models\Profile;
 use App\Models\Project;
+use App\Models\ProjectMedia;
 use App\Models\ProjectParticipant;
 use App\Models\ProjectRequirement;
 use App\Models\ProjectVote;
@@ -282,6 +283,15 @@ class ProjectDemoSeeder extends Seeder
             'is_donation' => false,
             'status' => ProjectStatus::Cancelled->value,
         ]);
+
+        // Cover image for every project (real, working URLs).
+        foreach (Project::all() as $project) {
+            ProjectMedia::create([
+                'project_id' => $project->id,
+                'file_path' => "https://picsum.photos/seed/project-{$project->id}/900/500",
+                'media_type' => 'image',
+            ]);
+        }
     }
 
     /**

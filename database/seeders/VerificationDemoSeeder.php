@@ -49,11 +49,11 @@ class VerificationDemoSeeder extends Seeder
 
             VerificationImages::create([
                 'verification_request_id' => $request->id,
-                'image_url' => 'verifications/demo/' . $client->id . '-front.jpg',
+                'image_url' => "https://picsum.photos/seed/verify-{$client->id}-front/700/450",
             ]);
             VerificationImages::create([
                 'verification_request_id' => $request->id,
-                'image_url' => 'verifications/demo/' . $client->id . '-back.jpg',
+                'image_url' => "https://picsum.photos/seed/verify-{$client->id}-back/700/450",
             ]);
 
             if ($status === VerificationStatus::Approved->value) {

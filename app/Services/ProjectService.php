@@ -307,7 +307,9 @@ class ProjectService
                 'id' => $media->id,
                 'file_path' => $media->file_path,
                 'media_type' => $media->media_type,
-                'file_url' => asset('storage/' . $media->file_path),
+                'file_url' => str_starts_with($media->file_path, 'http://') || str_starts_with($media->file_path, 'https://')
+                    ? $media->file_path
+                    : asset('storage/' . $media->file_path),
             ];
         }));
 

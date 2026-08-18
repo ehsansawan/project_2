@@ -106,7 +106,7 @@ class NewsSeeder extends Seeder
 
             NewsMedia::create([
                 'news_id' => $news->id,
-                'file_path' => 'news/demo/' . $news->id . '-cover.jpg',
+                'file_path' => "https://picsum.photos/seed/news-{$news->id}/800/450",
                 'media_type' => 'image',
             ]);
         }
