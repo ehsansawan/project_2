@@ -63,7 +63,7 @@ class VotingTest extends TestCase
 
         $vote = ProjectVote::where('project_id', $project->id)->where('user_id', $user->id)->first();
 
-        $this->assertEqualsWithDelta(11.0, (float) $vote->vote_weight, 0.0001);
+        $this->assertEqualsWithDelta(6.0, (float) $vote->vote_weight, 0.0001);
         $this->assertSame(100, $vote->citizenship_score_at_vote_time);
     }
 
@@ -83,7 +83,7 @@ class VotingTest extends TestCase
         $vote = ProjectVote::where('project_id', $project->id)->where('user_id', $user->id)->first();
 
         $this->assertSame(25, $vote->citizenship_score_at_vote_time);
-        $this->assertEqualsWithDelta(6.0, (float) $vote->vote_weight, 0.0001);
+        $this->assertEqualsWithDelta(3.5, (float) $vote->vote_weight, 0.0001);
     }
 
     public function test_non_votable_project_cannot_receive_a_vote(): void
@@ -141,7 +141,7 @@ class VotingTest extends TestCase
     public function test_votable_listing_computes_weighted_approval_percentage_and_my_vote(): void
     {
         $voterA = $this->makeUser();
-        $this->makeProfile($voterA, 100); // weight 11, votes yes
+        $this->makeProfile($voterA, 100); // weight 6, votes yes
         $voterB = $this->makeUser();
         $this->makeProfile($voterB, 0); // weight 1, votes no
 
@@ -162,10 +162,10 @@ class VotingTest extends TestCase
 
         $this->assertNotNull($row);
         $this->assertSame(2, $row['total_votes']);
-        $this->assertEqualsWithDelta(11.0, $row['weighted_yes_votes'], 0.0001);
+        $this->assertEqualsWithDelta(6.0, $row['weighted_yes_votes'], 0.0001);
         $this->assertEqualsWithDelta(1.0, $row['weighted_no_votes'], 0.0001);
-        // 11 / (11 + 1) * 100
-        $this->assertEqualsWithDelta(91.67, $row['approval_percentage'], 0.01);
+        // 6 / (6 + 1) * 100
+        $this->assertEqualsWithDelta(85.71, $row['approval_percentage'], 0.01);
         $this->assertTrue($row['has_voted']);
     }
 

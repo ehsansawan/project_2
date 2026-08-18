@@ -11,18 +11,26 @@ use Illuminate\Support\Facades\DB;
 class ProjectVoteService
 {
     /**
-     * Weight formula: 1 + sqrt(max(citizenship_score, 0)).
+     * Scales down how much citizenship_score can move the vote weight.
+     * Lower value = flatter influence, i.e. citizens are closer to equal.
+     */
+    private const CITIZENSHIP_INFLUENCE_FACTOR = 0.5;
+
+    /**
+     * Weight formula: 1 + CITIZENSHIP_INFLUENCE_FACTOR * sqrt(max(citizenship_score, 0)).
      *
      * A flat +1 baseline guarantees every citizen's vote counts for at least
      * one unit. sqrt() grows sub-linearly so a high score can't dominate the
-     * outcome (score 100 -> weight 11, score 25 -> weight 6), unlike a raw
-     * linear weight, and it degrades gracefully if citizenship_score is ever
-     * left uncapped above 100 (it currently has no hard ceiling elsewhere in
-     * the codebase, only a floor at 0).
+     * outcome, unlike a raw linear weight, and it degrades gracefully if
+     * citizenship_score is ever left uncapped above 100 (it currently has no
+     * hard ceiling elsewhere in the codebase, only a floor at 0).
+     *
+     * The influence factor further tones down the spread between a score of
+     * 0 and 100: at 1.0 that spread was 1 -> 11 (11x); at 0.5 it's 1 -> 6.
      */
     public function calculateWeight(int $citizenshipScore): float
     {
-        return 1 + sqrt(max($citizenshipScore, 0));
+        return 1 + (self::CITIZENSHIP_INFLUENCE_FACTOR * sqrt(max($citizenshipScore, 0)));
     }
 
     public function vote($request): array
