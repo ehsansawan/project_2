@@ -4,10 +4,18 @@ namespace App\Services;
 
 use App\Models\Donation;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ProjectDonationService
 {
+    private CitizenshipService $citizenshipService;
+
+    public function __construct(CitizenshipService $citizenshipService)
+    {
+        $this->citizenshipService = $citizenshipService;
+    }
+
     public function record($request): array
     {
         $project = Project::query()->find($request['id']);
@@ -23,12 +31,21 @@ class ProjectDonationService
         $admin = auth('api')->user();
 
         $donation = DB::transaction(function () use ($project, $request, $admin) {
-            return Donation::query()->create([
+            $donation = Donation::query()->create([
                 'project_id' => $project->id,
                 'user_id' => $request['donor_user_id'],
                 'payment' => $request['amount'],
                 'recorded_by' => $admin->id,
             ]);
+
+            $increaseAmount = $this->citizenshipService->donationAmountToIncreaseAmount((float) $request['amount']);
+
+            if ($increaseAmount > 0) {
+                $donor = User::query()->find($request['donor_user_id']);
+                $this->citizenshipService->increase($donor, $increaseAmount);
+            }
+
+            return $donation;
         });
 
         // Note: deliberately not eager-loading the recordedBy() relation here -

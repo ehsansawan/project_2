@@ -22,7 +22,7 @@ class RecordDonationRequest extends FormRequest
         return [
             'id' => ['required', 'integer', 'exists:projects,id'],
             'donor_user_id' => ['required', 'integer', 'exists:users,id'],
-            'amount' => ['required', 'numeric', 'min:0.01'],
+            'amount' => ['required', 'numeric', 'min:1000'],
         ];
     }
 
@@ -41,7 +41,7 @@ class RecordDonationRequest extends FormRequest
             'donor_user_id.required' => 'Please specify the donor',
             'donor_user_id.exists' => 'Donor not found',
             'amount.required' => 'Please specify the donation amount',
-            'amount.min' => 'Donation amount must be greater than zero',
+            'amount.min' => 'Donation amount must be at least 1,000',
         ];
     }
 }

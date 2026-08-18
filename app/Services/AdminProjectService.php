@@ -14,6 +14,13 @@ use RuntimeException;
 
 class AdminProjectService
 {
+    private CitizenshipService $citizenshipService;
+
+    public function __construct(CitizenshipService $citizenshipService)
+    {
+        $this->citizenshipService = $citizenshipService;
+    }
+
     public function listVolunteerApplications($request): array
     {
         $project = Project::query()->find($request['id']);
@@ -103,6 +110,20 @@ class AdminProjectService
                     'auditable_id' => $participant->id,
                     'action' => AuditAction::Approve->value,
                 ]);
+
+                // Citizenship boost only on acceptance, scaled by how many times
+                // this user has been accepted as a volunteer so far (this one
+                // included) - repeat volunteers get a bigger increase.
+                $approvedVolunteeringCount = ProjectParticipant::query()
+                    ->where('user_id', $participant->user_id)
+                    ->where('status', 'approved')
+                    ->count();
+
+                $increaseAmount = $this->citizenshipService->volunteeringCountToIncreaseAmount($approvedVolunteeringCount);
+
+                if ($increaseAmount > 0) {
+                    $this->citizenshipService->increase($participant->user, $increaseAmount);
+                }
 
                 return $participant;
             });

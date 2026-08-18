@@ -33,6 +33,7 @@ class IndexProjectRequest extends FormRequest
         return [
             'statuses' => ['nullable', 'array'],
             'statuses.*' => ['string', new Enum(ProjectStatus::class)],
+            'is_votable' => ['nullable', 'boolean'],
         ];
     }
 
@@ -41,6 +42,7 @@ class IndexProjectRequest extends FormRequest
         return [
             'statuses.array' => 'The statuses parameter must be an array of status values.',
             'statuses.*.enum' => 'The status :input is invalid.',
+            'is_votable.boolean' => 'The is_votable filter must be true or false.',
         ];
     }
 }

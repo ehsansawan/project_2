@@ -383,4 +383,77 @@ class VolunteerTest extends TestCase
         $this->assertSame(1, $requirementRow['approved_count']);
         $this->assertSame(4, $requirementRow['remaining_count']);
     }
+
+    public function test_approving_a_volunteer_application_increases_the_applicants_citizenship_score(): void
+    {
+        $applicant = $this->makeUser();
+        $this->makeProfile($applicant, 50);
+        [, $applicantHeaders] = $this->actingAsApi($applicant, ['project.applyVolunteer']);
+
+        $project = $this->openVoluntaryProject();
+        $project->requirements()->create(['skill_name' => null, 'skill_type' => null, 'required_count' => 5]);
+        $this->postJson("/api/project/volunteer/{$project->id}", ['whatsapp_number' => '0991234567'], $applicantHeaders)->assertStatus(201);
+
+        $participant = ProjectParticipant::where('project_id', $project->id)->where('user_id', $applicant->id)->first();
+
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.approveVolunteerApplication']);
+        $this->postJson("/api/admin/project/volunteer-applications/{$participant->id}/approve", [], $adminHeaders)->assertStatus(200);
+
+        $score = $applicant->profile()->first()->citizenship_score;
+        $this->assertGreaterThan(50, $score);
+        $this->assertLessThanOrEqual(100, $score);
+    }
+
+    public function test_rejecting_a_volunteer_application_does_not_change_citizenship_score(): void
+    {
+        $applicant = $this->makeUser();
+        $this->makeProfile($applicant, 50);
+        [, $applicantHeaders] = $this->actingAsApi($applicant, ['project.applyVolunteer']);
+
+        $project = $this->openVoluntaryProject();
+        $project->requirements()->create(['skill_name' => null, 'skill_type' => null, 'required_count' => 5]);
+        $this->postJson("/api/project/volunteer/{$project->id}", ['whatsapp_number' => '0991234567'], $applicantHeaders)->assertStatus(201);
+
+        $participant = ProjectParticipant::where('project_id', $project->id)->where('user_id', $applicant->id)->first();
+
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.rejectVolunteerApplication']);
+        $this->postJson("/api/admin/project/volunteer-applications/{$participant->id}/reject", [], $adminHeaders)->assertStatus(200);
+
+        $score = $applicant->profile()->first()->citizenship_score;
+        $this->assertEquals(50, $score);
+    }
+
+    public function test_a_second_approved_volunteering_grants_a_bigger_or_equal_citizenship_boost_than_the_first(): void
+    {
+        $applicant = $this->makeUser();
+        $this->makeProfile($applicant, 50);
+        [, $applicantHeaders] = $this->actingAsApi($applicant, ['project.applyVolunteer']);
+
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.approveVolunteerApplication']);
+
+        $firstProject = $this->openVoluntaryProject();
+        $firstProject->requirements()->create(['skill_name' => null, 'skill_type' => null, 'required_count' => 5]);
+        $this->postJson("/api/project/volunteer/{$firstProject->id}", ['whatsapp_number' => '0991234567'], $applicantHeaders)->assertStatus(201);
+        $firstParticipant = ProjectParticipant::where('project_id', $firstProject->id)->where('user_id', $applicant->id)->first();
+        $this->postJson("/api/admin/project/volunteer-applications/{$firstParticipant->id}/approve", [], $adminHeaders)->assertStatus(200);
+
+        $scoreAfterFirst = (float) $applicant->profile()->first()->citizenship_score;
+        $firstGain = $scoreAfterFirst - 50;
+
+        $secondProject = $this->openVoluntaryProject();
+        $secondProject->requirements()->create(['skill_name' => null, 'skill_type' => null, 'required_count' => 5]);
+        $this->postJson("/api/project/volunteer/{$secondProject->id}", ['whatsapp_number' => '0991234567'], $applicantHeaders)->assertStatus(201);
+        $secondParticipant = ProjectParticipant::where('project_id', $secondProject->id)->where('user_id', $applicant->id)->first();
+        $this->postJson("/api/admin/project/volunteer-applications/{$secondParticipant->id}/approve", [], $adminHeaders)->assertStatus(200);
+
+        $scoreAfterSecond = (float) $applicant->profile()->first()->citizenship_score;
+        $secondGain = $scoreAfterSecond - $scoreAfterFirst;
+
+        $this->assertGreaterThan(0, $firstGain);
+        $this->assertGreaterThanOrEqual($firstGain, $secondGain);
+        $this->assertLessThanOrEqual(100, $scoreAfterSecond);
+    }
 }

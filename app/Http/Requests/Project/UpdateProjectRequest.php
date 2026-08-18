@@ -34,6 +34,7 @@ class UpdateProjectRequest extends FormRequest
             ],
             'requires_volunteers' => ['nullable', 'boolean'],
             'requires_donations' => ['nullable', 'boolean'],
+            'is_votable' => ['nullable', 'boolean'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'budget' => ['nullable', 'numeric', 'min:0'],

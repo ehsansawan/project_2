@@ -117,4 +117,38 @@ class CitizenshipService
             default => 1.0,
         };
     }
+
+    /**
+     * Donation amount -> increase() amount tier.
+     * 1,000-10,000 = 10, 10,000-100,000 = 15, 100,000-1,000,000 = 20, > 1,000,000 = 25.
+     * Below 1,000 returns 0 (no increase) - RecordDonationRequest enforces a
+     * 1,000 minimum so this floor shouldn't be reachable in practice.
+     */
+    public function donationAmountToIncreaseAmount(float $donationAmount): float
+    {
+        return match (true) {
+            $donationAmount >= 1_000_000 => 25.0,
+            $donationAmount >= 100_000 => 20.0,
+            $donationAmount >= 10_000 => 15.0,
+            $donationAmount >= 1_000 => 10.0,
+            default => 0.0,
+        };
+    }
+
+    /**
+     * Approved-volunteering count -> increase() amount tier: repeat
+     * volunteers get a bigger boost. No exact tiers were specified for this
+     * side, so this mirrors the donation scale (10/15/20/25) for a
+     * consistent scoring vocabulary across both features.
+     */
+    public function volunteeringCountToIncreaseAmount(int $approvedVolunteeringCount): float
+    {
+        return match (true) {
+            $approvedVolunteeringCount >= 7 => 25.0,
+            $approvedVolunteeringCount >= 4 => 20.0,
+            $approvedVolunteeringCount >= 2 => 15.0,
+            $approvedVolunteeringCount >= 1 => 10.0,
+            default => 0.0,
+        };
+    }
 }

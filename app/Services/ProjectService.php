@@ -22,6 +22,7 @@ class ProjectService
             'type' => 'municipal',
             'is_voluntary' => $request['requires_volunteers'] ?? false,
             'is_donation' => $request['requires_donations'] ?? false,
+            'is_votable' => $request['is_votable'] ?? false,
             'latitude' => $request['latitude'] ?? null,
             'longitude' => $request['longitude'] ?? null,
             'budget' => $request['budget'] ?? null,
@@ -49,6 +50,10 @@ class ProjectService
 
         if (!empty($request['statuses'])) {
             $query->whereIn('status', $request['statuses']);
+        }
+
+        if (array_key_exists('is_votable', $request) && $request['is_votable'] !== null) {
+            $query->where('is_votable', filter_var($request['is_votable'], FILTER_VALIDATE_BOOLEAN));
         }
 
         $projects = $query->latest()->paginate(15);
@@ -100,6 +105,7 @@ class ProjectService
             'description' => $request['description'] ?? $project->description,
             'is_voluntary' => $request['requires_volunteers'] ?? $project->is_voluntary,
             'is_donation' => $request['requires_donations'] ?? $project->is_donation,
+            'is_votable' => $request['is_votable'] ?? $project->is_votable,
             'latitude' => $request['latitude'] ?? $project->latitude,
             'longitude' => $request['longitude'] ?? $project->longitude,
             'budget' => $request['budget'] ?? $project->budget,
