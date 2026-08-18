@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Middleware\jwtMiddleware;
+use App\Http\Middleware\VerifiedAccount;
 use App\Http\Middleware\VerifiedEmail;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
@@ -144,10 +145,10 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::post('/reject/{id}', 'reject')->name('reject')->middleware('can:project.reject');
             Route::post('/update/{id}', 'update')->name('update')->middleware('can:project.update');
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('can:project.destroy');
-            Route::post('/vote/{id}', 'vote')->name('vote')->middleware('can:project.vote');
-            Route::delete('/vote/{id}', 'unvote')->name('unvote')->middleware('can:project.unvote');
+            Route::post('/vote/{id}', 'vote')->name('vote')->middleware('can:project.vote',VerifiedAccount::class);
+            Route::delete('/vote/{id}', 'unvote')->name('unvote')->middleware('can:project.unvote',VerifiedAccount::class);
             Route::get('/{id}/voting/stats', 'votingStats')->name('votingStats')->middleware('can:project.votingStats');
-            Route::post('/volunteer/{id}', 'applyVolunteer')->name('applyVolunteer')->middleware('can:project.applyVolunteer');
+            Route::post('/volunteer/{id}', 'applyVolunteer')->name('applyVolunteer')->middleware('can:project.applyVolunteer',VerifiedAccount::class);
             Route::get('/{id}/donations', 'listDonations')->name('listDonations')->middleware('can:project.listDonations');
             Route::get('/{id}/donations/stats', 'donationStats')->name('donationStats')->middleware('can:project.donationStats');
             Route::get('/{id}/donations/top-donors', 'topDonors')->name('topDonors')->middleware('can:project.topDonors');
@@ -182,24 +183,24 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
         ->prefix("complains")
         ->name('complain.')
         ->group(function () {
-            Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware([VerifiedEmail::class, 'can:complain.store']);
+            Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware([VerifiedEmail::class, 'can:complain.store',VerifiedAccount::class]);
             Route::get('/complains', [ComplainController::class, 'index'])->middleware([jwtMiddleware::class, VerifiedEmail::class, 'can:complain.index'])->name('index');
             Route::get('/my-complains', [ComplainController::class, 'myComplains'])->middleware([jwtMiddleware::class, VerifiedEmail::class, 'can:complain.myComplains'])->name('myComplains');
 
             // التصويت
-            Route::post('/vote', [ComplainController::class, 'vote'])->middleware([jwtMiddleware::class, VerifiedEmail::class, 'can:complain.vote'])->name('vote');
-            Route::delete('/vote', [ComplainController::class, 'unvote'])->middleware([jwtMiddleware::class, VerifiedEmail::class, 'can:complain.unvote'])->name('unvote');
+            Route::post('/vote', [ComplainController::class, 'vote'])->middleware([jwtMiddleware::class, VerifiedEmail::class, 'can:complain.vote',VerifiedAccount::class])->name('vote');
+            Route::delete('/vote', [ComplainController::class, 'unvote'])->middleware([jwtMiddleware::class, VerifiedEmail::class, 'can:complain.unvote',VerifiedAccount::class])->name('unvote');
          //   Route::get("/","index")->name('index');
             Route::get("/{complainId}","show")->name('show')->middleware([jwtMiddleware::class, 'can:complain.show']);
-            Route::put("/{complainId}","update")->name('update')->middleware([jwtMiddleware::class, 'can:complain.update']);
-            Route::delete("/{complainId}","destroy")->name('destroy')->middleware([jwtMiddleware::class, 'can:complain.destroy']);
+            Route::put("/{complainId}","update")->name('update')->middleware([jwtMiddleware::class, 'can:complain.update',VerifiedAccount::class]);
+            Route::delete("/{complainId}","destroy")->name('destroy')->middleware([jwtMiddleware::class, 'can:complain.destroy',VerifiedAccount::class]);
     });
 
     Route::controller(ReportController::class)
         ->prefix("reports")
         ->name('report.')
         ->group(function(){
-            Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware([VerifiedEmail::class, 'can:report.store']);
+            Route::middleware(jwtMiddleware::class)->post('/', 'store')->name('store')->middleware([VerifiedEmail::class, 'can:report.store',VerifiedAccount::class]);
         });
 
 
