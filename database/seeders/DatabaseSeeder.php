@@ -21,5 +21,19 @@ class DatabaseSeeder extends Seeder
             ReportTypeSeeder::class,
             ServiceSeeder::class,
         ]);
+
+        // Demo data for the interview build - new seeders only, appended
+        // after the existing ones above (which are left untouched).
+        $this->call([
+            ScoreRuleSeeder::class,
+            SkillCertificateSeeder::class,
+            VerificationDemoSeeder::class,
+            PropertyLicenseSeeder::class,
+            ProjectDemoSeeder::class,
+            ComplainDemoSeeder::class,
+            QueueDemoSeeder::class,
+            NewsSeeder::class,
+            NotificationDemoSeeder::class,
+        ]);
     }
 }
