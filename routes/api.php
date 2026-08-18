@@ -22,6 +22,7 @@ use App\Http\Controllers\UserCertificateController;
 use App\Http\Controllers\AdminComplainController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AdminProjectController;
+use App\Http\Controllers\NotificationController;
 
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\AdminNewsController;
@@ -117,6 +118,15 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::get('/show/{id}', 'show')->name('show')->middleware('can:profile.show');
             Route::post('/update', 'update')->name('update')->middleware('can:profile.update');
             Route::delete('/avatar', 'destroyAvatar')->name('destroyAvatar')->middleware('can:profile.destroyAvatar');
+        });
+
+    // Notification routes (own notifications only)
+    Route::controller(NotificationController::class)->prefix('notification')
+        ->name('notification.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index')->middleware('can:notification.index');
+            Route::post('/{id}/read', 'markAsRead')->name('markAsRead')->middleware('can:notification.markAsRead');
+            Route::delete('/{id}', 'destroy')->name('destroy')->middleware('can:notification.destroy');
         });
 
     // User skills routes

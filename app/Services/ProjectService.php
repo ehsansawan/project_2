@@ -72,7 +72,6 @@ class ProjectService
 
         return ['data' => $projects, 'message' => 'projects retrieved successfully', 'code' => 200];
     }
-
     public function show($request): array
     {
         $project = Project::query()->with(['user.profile', 'requirements' => $this->requirementsConstraint()])->find($request['id']);
@@ -209,7 +208,6 @@ class ProjectService
             'code' => 200,
         ];
     }
-
     public function approve($request): array
     {
         $project = Project::query()->find($request['id']);

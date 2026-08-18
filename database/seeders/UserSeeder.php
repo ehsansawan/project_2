@@ -153,6 +153,10 @@ class UserSeeder extends Seeder
             'project.votingOverview',
             'project.votingStatistics',
 
+            // ===== الإشعارات (Notifications) =====
+            'notification.index',
+            'notification.markAsRead',
+            'notification.destroy',
 
             // ===== الأخبار (News) =====
             'news.store',
@@ -229,6 +233,11 @@ class UserSeeder extends Seeder
             'project.votingOverview',
             'project.votingStatistics',
 
+            // ===== الإشعارات (Notifications) =====
+            'notification.index',
+            'notification.markAsRead',
+            'notification.destroy',
+
             // ===== الأخبار (News) =====
             'news.store',
         ];
@@ -282,6 +291,11 @@ class UserSeeder extends Seeder
 
             'admin.services.index',
             'admin.services.show',
+
+            // ===== الإشعارات (Notifications) =====
+            'notification.index',
+            'notification.markAsRead',
+            'notification.destroy',
 
             // ===== إدارة حساب المستخدم (User's own account) =====
             'user.update',
