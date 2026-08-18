@@ -3,11 +3,13 @@
 namespace Tests\Feature\Project;
 
 use App\Enums\SkillType;
+use App\Mail\VolunteerApplicationDecision;
 use App\Models\Project;
 use App\Models\ProjectParticipant;
 use App\Models\UserCertificate;
 use App\Models\UserSkill;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\Concerns\AuthenticatesUsers;
 use Tests\TestCase;
 
@@ -455,5 +457,61 @@ class VolunteerTest extends TestCase
         $this->assertGreaterThan(0, $firstGain);
         $this->assertGreaterThanOrEqual($firstGain, $secondGain);
         $this->assertLessThanOrEqual(100, $scoreAfterSecond);
+    }
+
+    public function test_approving_a_volunteer_application_notifies_and_emails_the_applicant(): void
+    {
+        Mail::fake();
+
+        $applicant = $this->makeUser();
+        $this->makeProfile($applicant);
+        [, $applicantHeaders] = $this->actingAsApi($applicant, ['project.applyVolunteer']);
+
+        $project = $this->openVoluntaryProject(['name' => 'Riverside Cleanup']);
+        $project->requirements()->create(['skill_name' => null, 'skill_type' => null, 'required_count' => 5]);
+        $this->postJson("/api/project/volunteer/{$project->id}", ['whatsapp_number' => '0991234567'], $applicantHeaders)->assertStatus(201);
+
+        $participant = ProjectParticipant::where('project_id', $project->id)->where('user_id', $applicant->id)->first();
+
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.approveVolunteerApplication']);
+        $this->postJson("/api/admin/project/volunteer-applications/{$participant->id}/approve", [], $adminHeaders)->assertStatus(200);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $applicant->id,
+            'title' => 'Volunteer Application Approved',
+        ]);
+
+        Mail::assertSent(VolunteerApplicationDecision::class, function ($mail) use ($applicant) {
+            return $mail->hasTo($applicant->email) && $mail->status === 'approved' && $mail->projectName === 'Riverside Cleanup';
+        });
+    }
+
+    public function test_rejecting_a_volunteer_application_notifies_and_emails_the_applicant(): void
+    {
+        Mail::fake();
+
+        $applicant = $this->makeUser();
+        $this->makeProfile($applicant);
+        [, $applicantHeaders] = $this->actingAsApi($applicant, ['project.applyVolunteer']);
+
+        $project = $this->openVoluntaryProject(['name' => 'Riverside Cleanup']);
+        $project->requirements()->create(['skill_name' => null, 'skill_type' => null, 'required_count' => 5]);
+        $this->postJson("/api/project/volunteer/{$project->id}", ['whatsapp_number' => '0991234567'], $applicantHeaders)->assertStatus(201);
+
+        $participant = ProjectParticipant::where('project_id', $project->id)->where('user_id', $applicant->id)->first();
+
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.rejectVolunteerApplication']);
+        $this->postJson("/api/admin/project/volunteer-applications/{$participant->id}/reject", [], $adminHeaders)->assertStatus(200);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $applicant->id,
+            'title' => 'Volunteer Application Rejected',
+        ]);
+
+        Mail::assertSent(VolunteerApplicationDecision::class, function ($mail) use ($applicant) {
+            return $mail->hasTo($applicant->email) && $mail->status === 'rejected' && $mail->projectName === 'Riverside Cleanup';
+        });
     }
 }

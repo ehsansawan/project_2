@@ -6,14 +6,18 @@ use App\Models\Donation;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ProjectDonationService
 {
     private CitizenshipService $citizenshipService;
+    private FcmService $fcmService;
 
-    public function __construct(CitizenshipService $citizenshipService)
+    public function __construct(CitizenshipService $citizenshipService, FcmService $fcmService)
     {
         $this->citizenshipService = $citizenshipService;
+        $this->fcmService = $fcmService;
     }
 
     public function record($request): array
@@ -29,8 +33,9 @@ class ProjectDonationService
         }
 
         $admin = auth('api')->user();
+        $donor = null;
 
-        $donation = DB::transaction(function () use ($project, $request, $admin) {
+        $donation = DB::transaction(function () use ($project, $request, $admin, &$donor) {
             $donation = Donation::query()->create([
                 'project_id' => $project->id,
                 'user_id' => $request['donor_user_id'],
@@ -38,15 +43,37 @@ class ProjectDonationService
                 'recorded_by' => $admin->id,
             ]);
 
+            $donor = User::query()->find($request['donor_user_id']);
+
             $increaseAmount = $this->citizenshipService->donationAmountToIncreaseAmount((float) $request['amount']);
 
             if ($increaseAmount > 0) {
-                $donor = User::query()->find($request['donor_user_id']);
                 $this->citizenshipService->increase($donor, $increaseAmount);
             }
 
             return $donation;
         });
+
+        // Mirrors AdminVerificationService's approve/reject notification
+        // pattern; runs after commit so a Firebase/DB hiccup here never turns
+        // an already-recorded donation into an API error.
+        try {
+            $title = 'Donation Recorded';
+            $body = "Thank you! Your donation of {$request['amount']} to \"{$project->name}\" has been recorded.";
+            $data = [
+                'type' => 'donation',
+                'project_id' => (string) $project->id,
+                'donation_id' => (string) $donation->id,
+            ];
+
+            $this->fcmService->sendToUser($donor, $title, $body, $data);
+            $this->fcmService->storeNotification($donor, $title, $body, $data);
+        } catch (Throwable $e) {
+            Log::error('Failed to notify donor of recorded donation', [
+                'donation_id' => $donation->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Note: deliberately not eager-loading the recordedBy() relation here -
         // its snake_case key ("recorded_by") collides with the raw recorded_by

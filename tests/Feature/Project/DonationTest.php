@@ -220,4 +220,19 @@ class DonationTest extends TestCase
         $this->assertGreaterThan(0, $smallGain);
         $this->assertGreaterThan($smallGain, $largeGain);
     }
+
+    public function test_recording_a_donation_notifies_the_donor(): void
+    {
+        $project = $this->donatableProject(['name' => 'Clean Water Fund']);
+        $donor = $this->makeUser();
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.recordDonation']);
+
+        $this->postJson("/api/admin/project/{$project->id}/donations", ['donor_user_id' => $donor->id, 'amount' => 5000], $adminHeaders)->assertStatus(201);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $donor->id,
+            'title' => 'Donation Recorded',
+        ]);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\AuditAction;
+use App\Mail\VolunteerApplicationDecision;
 use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\ProjectParticipant;
@@ -11,17 +12,25 @@ use App\Models\ProjectVote;
 use App\Models\UserCertificate;
 use App\Models\UserSkill;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use RuntimeException;
+use Throwable;
 
 class AdminProjectService
 {
     private CitizenshipService $citizenshipService;
     private ProjectVoteService $projectVoteService;
+    private FcmService $fcmService;
 
-    public function __construct(CitizenshipService $citizenshipService, ProjectVoteService $projectVoteService)
-    {
+    public function __construct(
+        CitizenshipService $citizenshipService,
+        ProjectVoteService $projectVoteService,
+        FcmService $fcmService
+    ) {
         $this->citizenshipService = $citizenshipService;
         $this->projectVoteService = $projectVoteService;
+        $this->fcmService = $fcmService;
     }
 
     /**
@@ -101,7 +110,6 @@ class AdminProjectService
             'code' => 200,
         ];
     }
-
     public function listVolunteerApplications($request): array
     {
         $project = Project::query()->find($request['id']);
@@ -212,6 +220,11 @@ class AdminProjectService
             return ['data' => null, 'message' => $e->getMessage(), 'code' => $e->getCode()];
         }
 
+        // Notify after the transaction has committed, mirroring
+        // AdminVerificationService::Approve() - a notification/email hiccup
+        // must never roll back an already-committed approval.
+        $this->notifyVolunteerDecision($participant, 'approved');
+
         return ['data' => $participant->load('user.profile', 'requirement'), 'message' => 'volunteer application approved successfully', 'code' => 200];
     }
     public function rejectVolunteerApplication($request): array
@@ -240,7 +253,49 @@ class AdminProjectService
             'action' => AuditAction::Reject->value,
         ]);
 
+        $this->notifyVolunteerDecision($participant, 'rejected');
+
         return ['data' => $participant->load('user.profile'), 'message' => 'volunteer application rejected successfully', 'code' => 200];
+    }
+
+    /**
+     * Mirrors AdminVerificationService's approve/reject notification pattern
+     * (push + stored in-app notification via FcmService) and additionally
+     * emails the applicant, since a volunteer decision - unlike most admin
+     * actions in this app - was specifically called out as needing an email.
+     *
+     * Runs after the approval/rejection has already been committed, so any
+     * failure here (bad mail config, Firebase down) is swallowed and logged
+     * rather than turning an already-successful decision into an API error.
+     */
+    private function notifyVolunteerDecision(ProjectParticipant $participant, string $status): void
+    {
+        try {
+            $user = $participant->user;
+            $projectName = $participant->project->name;
+
+            $title = $status === 'approved' ? 'Volunteer Application Approved' : 'Volunteer Application Rejected';
+            $body = $status === 'approved'
+                ? "Your application to volunteer for \"{$projectName}\" has been approved."
+                : "Your application to volunteer for \"{$projectName}\" was not accepted.";
+            $data = [
+                'type' => 'volunteer_application',
+                'status' => $status,
+                'project_id' => (string) $participant->project_id,
+                'participant_id' => (string) $participant->id,
+            ];
+
+            $this->fcmService->sendToUser($user, $title, $body, $data);
+            $this->fcmService->storeNotification($user, $title, $body, $data);
+
+            Mail::to($user->email)->send(new VolunteerApplicationDecision($status, $projectName));
+        } catch (Throwable $e) {
+            Log::error('Failed to notify volunteer of application decision', [
+                'participant_id' => $participant->id,
+                'status' => $status,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
     public function forceCloseVoting($request): array
     {
