@@ -110,7 +110,9 @@ class NewsRepository
                 'id' => $m->id,
                 'file_path' => $m->file_path,
                 'media_type' => $m->media_type,
-                'file_url' => asset('storage/' . $m->file_path),
+                'file_url' => str_starts_with($m->file_path, 'http://') || str_starts_with($m->file_path, 'https://')
+                    ? $m->file_path
+                    : asset('storage/' . $m->file_path),
             ])->toArray(),
         ];
 

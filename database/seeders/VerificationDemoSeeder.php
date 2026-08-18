@@ -25,19 +25,26 @@ class VerificationDemoSeeder extends Seeder
         $admins = User::role('admin')->get();
         $clients = User::role('client')->orderBy('id')->get();
 
+        // First 5 clients (in id order) are verified; everyone else is not -
+        // a fixed, predictable split rather than a scattered pattern, so it's
+        // always clear which demo accounts are verified.
+        $verifiedCount = 5;
+
         foreach ($clients as $index => $client) {
-            // Only two thirds of clients have submitted a verification request.
-            if ($index % 3 === 2) {
+            $isVerifiedClient = $index < $verifiedCount;
+
+            // Among the non-verified clients, one third never even submitted
+            // a request (nothing to review yet).
+            if (!$isVerifiedClient && ($index - $verifiedCount) % 3 === 2) {
                 continue;
             }
 
             // Column is varchar(11): '9' + 10 zero-padded digits = 11 chars exactly.
             $nationalId = '9' . str_pad((string) $client->id, 10, '0', STR_PAD_LEFT);
 
-            $statusRoll = $index % 3;
-            $status = match ($statusRoll) {
-                0 => VerificationStatus::Approved->value,
-                1 => VerificationStatus::Pending->value,
+            $status = match (true) {
+                $isVerifiedClient => VerificationStatus::Approved->value,
+                ($index - $verifiedCount) % 3 === 0 => VerificationStatus::Pending->value,
                 default => VerificationStatus::Rejected->value,
             };
 
