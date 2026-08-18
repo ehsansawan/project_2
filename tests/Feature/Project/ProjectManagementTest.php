@@ -110,4 +110,69 @@ class ProjectManagementTest extends TestCase
         $this->assertContains($votable->id, $ids);
         $this->assertContains($nonVotable->id, $ids);
     }
+
+    public function test_pending_approval_splits_submitted_projects_by_votable_status(): void
+    {
+        $superAdmin = $this->makeUser();
+        [, $headers] = $this->actingAsApi($superAdmin, ['project.pendingApproval']);
+
+        $votable = Project::factory()->votable()->submitted()->create(['user_id' => $superAdmin->id]);
+        $nonVotable = Project::factory()->submitted()->create(['user_id' => $superAdmin->id, 'is_votable' => false]);
+        $stillPlanning = Project::factory()->votable()->create(['user_id' => $superAdmin->id]);
+
+        $response = $this->getJson('/api/project/pending-approval', $headers);
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+
+        $votableIds = collect($data['votable']['data'])->pluck('id')->all();
+        $nonVotableIds = collect($data['non_votable']['data'])->pluck('id')->all();
+
+        $this->assertContains($votable->id, $votableIds);
+        $this->assertNotContains($nonVotable->id, $votableIds);
+
+        $this->assertContains($nonVotable->id, $nonVotableIds);
+        $this->assertNotContains($votable->id, $nonVotableIds);
+
+        $this->assertNotContains($stillPlanning->id, $votableIds);
+        $this->assertNotContains($stillPlanning->id, $nonVotableIds);
+    }
+
+    public function test_pending_approval_orders_votable_projects_by_vote_count_descending(): void
+    {
+        $superAdmin = $this->makeUser();
+        [, $headers] = $this->actingAsApi($superAdmin, ['project.pendingApproval']);
+
+        $fewVotes = Project::factory()->votable()->submitted()->create(['user_id' => $superAdmin->id]);
+        $manyVotes = Project::factory()->votable()->submitted()->create(['user_id' => $superAdmin->id]);
+
+        $oneVoter = $this->makeUser();
+        $this->makeProfile($oneVoter);
+        [, $oneVoterHeaders] = $this->actingAsApi($oneVoter, ['project.vote']);
+        $this->postJson("/api/project/vote/{$fewVotes->id}", ['value' => true], $oneVoterHeaders)->assertStatus(201);
+
+        foreach (range(1, 3) as $i) {
+            $voter = $this->makeUser();
+            $this->makeProfile($voter);
+            [, $voterHeaders] = $this->actingAsApi($voter, ['project.vote']);
+            $this->postJson("/api/project/vote/{$manyVotes->id}", ['value' => true], $voterHeaders)->assertStatus(201);
+        }
+
+        $response = $this->getJson('/api/project/pending-approval', $headers);
+
+        $response->assertStatus(200);
+        $ids = collect($response->json('data.votable.data'))->pluck('id')->all();
+
+        $this->assertSame([$manyVotes->id, $fewVotes->id], array_values(array_intersect($ids, [$manyVotes->id, $fewVotes->id])));
+    }
+
+    public function test_regular_admin_cannot_view_the_pending_approval_queue(): void
+    {
+        $admin = $this->makeUser();
+        [, $headers] = $this->actingAsApi($admin, ['project.index', 'project.show']); // typical admin permission set, no pendingApproval
+
+        $response = $this->getJson('/api/project/pending-approval', $headers);
+
+        $response->assertStatus(403);
+    }
 }

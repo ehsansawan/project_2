@@ -280,4 +280,112 @@ class VotingTest extends TestCase
         $response->assertStatus(422);
         $this->assertDatabaseHas('project_votes', ['project_id' => $project->id, 'user_id' => $user->id]);
     }
+
+    public function test_client_can_view_voting_stats_for_a_project_still_open_for_voting(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $voter = $this->makeUser();
+        $this->makeProfile($voter, 50);
+        [, $voterHeaders] = $this->actingAsApi($voter, ['project.vote', 'project.votingStats']);
+
+        $this->postJson("/api/project/vote/{$project->id}", ['value' => true], $voterHeaders)->assertStatus(201);
+
+        $response = $this->getJson("/api/project/{$project->id}/voting/stats", $voterHeaders);
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        $this->assertSame(1, $data['total_votes']);
+        $this->assertSame('active', $data['voting_status']);
+        $this->assertTrue($data['has_voted']);
+        $this->assertArrayNotHasKey('votes', $data); // no individual vote list for citizens
+    }
+
+    public function test_client_can_still_view_voting_stats_after_the_project_leaves_the_voting_stage(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $voter = $this->makeUser();
+        $this->makeProfile($voter, 50);
+        [, $voterHeaders] = $this->actingAsApi($voter, ['project.vote', 'project.votingStats']);
+
+        $this->postJson("/api/project/vote/{$project->id}", ['value' => true], $voterHeaders)->assertStatus(201);
+
+        $project->update(['status' => \App\Enums\ProjectStatus::Approved]);
+
+        // No longer in the votable() listing (status != submitted)...
+        $listResponse = $this->getJson('/api/project/votable', $voterHeaders);
+        $this->assertNotContains($project->id, collect($listResponse->json('data.data'))->pluck('id')->all());
+
+        // ...but the dedicated per-project stats endpoint still shows the final result.
+        $response = $this->getJson("/api/project/{$project->id}/voting/stats", $voterHeaders);
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        $this->assertSame(1, $data['total_votes']);
+        $this->assertSame('concluded', $data['voting_status']);
+    }
+
+    public function test_admin_can_view_the_voting_overview(): void
+    {
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.votingOverview']);
+
+        $active = $this->votableSubmittedProject();
+        $planning = Project::factory()->votable()->create(['user_id' => $admin->id]);
+
+        $voter = $this->makeUser();
+        $this->makeProfile($voter, 50);
+        [, $voterHeaders] = $this->actingAsApi($voter, ['project.vote']);
+        $this->postJson("/api/project/vote/{$active->id}", ['value' => true], $voterHeaders)->assertStatus(201);
+
+        $response = $this->getJson('/api/admin/project/voting/statistics', $adminHeaders);
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        $this->assertSame(2, $data['total_votable_projects']);
+        $this->assertSame(1, $data['by_voting_status']['active']);
+        $this->assertSame(1, $data['by_voting_status']['not_started']);
+        $this->assertSame(1, $data['total_votes_cast']);
+    }
+
+    public function test_client_cannot_view_the_admin_voting_overview(): void
+    {
+        $user = $this->makeUser();
+        [, $headers] = $this->actingAsApi($user, []);
+
+        $response = $this->getJson('/api/admin/project/voting/statistics', $headers);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_can_view_per_project_voting_statistics_with_individual_votes(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $voter = $this->makeUser();
+        $this->makeProfile($voter, 80);
+        [, $voterHeaders] = $this->actingAsApi($voter, ['project.vote']);
+        $this->postJson("/api/project/vote/{$project->id}", ['value' => true], $voterHeaders)->assertStatus(201);
+
+        $admin = $this->makeUser();
+        [, $adminHeaders] = $this->actingAsApi($admin, ['project.votingStatistics']);
+
+        $response = $this->getJson("/api/admin/project/{$project->id}/voting/statistics", $adminHeaders);
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        $this->assertSame(1, $data['total_votes']);
+        $votes = $data['votes']['data'];
+        $this->assertCount(1, $votes);
+        $this->assertSame($voter->id, $votes[0]['user_id']);
+        $this->assertSame(80, $votes[0]['citizenship_score_at_vote_time']);
+    }
+
+    public function test_client_cannot_view_per_project_admin_voting_statistics(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $user = $this->makeUser();
+        [, $headers] = $this->actingAsApi($user, ['project.votingStats']);
+
+        $response = $this->getJson("/api/admin/project/{$project->id}/voting/statistics", $headers);
+
+        $response->assertStatus(403);
+    }
 }

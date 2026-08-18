@@ -41,6 +41,12 @@ class Project extends Model
     /**
      * Derived, never persisted: recomputed from is_votable/status/voting_ends_at/voting_closed_at
      * on every access so it can never drift out of sync with those columns.
+     *
+     * 'active' is only possible while status=submitted (the actual voting
+     * window enforced by ProjectVoteService::vote()). A project still in
+     * planning hasn't opened voting yet; anything past submitted (approved,
+     * rejected, open, active, completed, cancelled) has voting permanently
+     * concluded regardless of voting_ends_at/voting_closed_at.
      */
     protected function votingStatus(): Attribute
     {
@@ -48,6 +54,14 @@ class Project extends Model
             get: function () {
                 if (!$this->is_votable) {
                     return 'not_applicable';
+                }
+
+                if ($this->status === ProjectStatus::Planning) {
+                    return 'not_started';
+                }
+
+                if ($this->status !== ProjectStatus::Submitted) {
+                    return 'concluded';
                 }
 
                 if ($this->voting_closed_at !== null) {

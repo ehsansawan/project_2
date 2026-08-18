@@ -133,12 +133,14 @@ class UserSeeder extends Seeder
             'project.submitForReview',
             'project.approve',
             'project.reject',
+            'project.pendingApproval',
             'project.update',
             'project.destroy',
             'project.publicIndex',
             'project.votable',
             'project.vote',
             'project.unvote',
+            'project.votingStats',
             'project.applyVolunteer',
             'project.listDonations',
             'project.donationStats',
@@ -148,6 +150,8 @@ class UserSeeder extends Seeder
             'project.rejectVolunteerApplication',
             'project.closeVoting',
             'project.recordDonation',
+            'project.votingOverview',
+            'project.votingStatistics',
 
 
             // ===== الأخبار (News) =====
@@ -219,6 +223,8 @@ class UserSeeder extends Seeder
             'project.rejectVolunteerApplication',
             'project.closeVoting',
             'project.recordDonation',
+            'project.votingOverview',
+            'project.votingStatistics',
 
             // ===== الأخبار (News) =====
             'news.store',
@@ -265,6 +271,7 @@ class UserSeeder extends Seeder
             'project.votable',
             'project.vote',
             'project.unvote',
+            'project.votingStats',
             'project.applyVolunteer',
             'project.listDonations',
             'project.donationStats',

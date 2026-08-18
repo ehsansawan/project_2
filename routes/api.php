@@ -136,6 +136,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::get('/', 'index')->name('index')->middleware('can:project.index');
             Route::get('/public', 'publicIndex')->name('publicIndex')->middleware('can:project.publicIndex');
             Route::get('/votable', 'votable')->name('votable')->middleware('can:project.votable');
+            Route::get('/pending-approval', 'pendingApproval')->name('pendingApproval')->middleware('can:project.pendingApproval');
             Route::get('/{id}', 'show')->name('show')->middleware('can:project.show');
             Route::post('/create', 'store')->name('create')->middleware('can:project.create');
             Route::post('/submit/{id}', 'submitForReview')->name('submitForReview')->middleware('can:project.submitForReview');
@@ -145,6 +146,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('can:project.destroy');
             Route::post('/vote/{id}', 'vote')->name('vote')->middleware('can:project.vote');
             Route::delete('/vote/{id}', 'unvote')->name('unvote')->middleware('can:project.unvote');
+            Route::get('/{id}/voting/stats', 'votingStats')->name('votingStats')->middleware('can:project.votingStats');
             Route::post('/volunteer/{id}', 'applyVolunteer')->name('applyVolunteer')->middleware('can:project.applyVolunteer');
             Route::get('/{id}/donations', 'listDonations')->name('listDonations')->middleware('can:project.listDonations');
             Route::get('/{id}/donations/stats', 'donationStats')->name('donationStats')->middleware('can:project.donationStats');
@@ -265,6 +267,11 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
     Route::middleware([jwtMiddleware::class, VerifiedEmail::class])->prefix('admin/project')
         ->name('admin.project.')
         ->group(function () {
+        // Static "voting/statistics" segment must be registered before the
+        // dynamic "{id}/voting/statistics" route below it, otherwise Laravel
+        // would match "voting" itself as {id} and this route would never be reached.
+        Route::get('/voting/statistics', [AdminProjectController::class, 'votingOverview'])->name('votingOverview')->middleware('can:project.votingOverview');
+        Route::get('/{id}/voting/statistics', [AdminProjectController::class, 'votingStatistics'])->name('votingStatistics')->middleware('can:project.votingStatistics');
         Route::get('/{id}/volunteer-applications', [AdminProjectController::class, 'listVolunteerApplications'])->name('listVolunteerApplications')->middleware('can:project.listVolunteerApplications');
         Route::post('/volunteer-applications/{id}/approve', [AdminProjectController::class, 'approveVolunteerApplication'])->name('approveVolunteerApplication')->middleware('can:project.approveVolunteerApplication');
         Route::post('/volunteer-applications/{id}/reject', [AdminProjectController::class, 'rejectVolunteerApplication'])->name('rejectVolunteerApplication')->middleware('can:project.rejectVolunteerApplication');

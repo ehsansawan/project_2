@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\ProjectParticipant;
 use App\Models\ProjectRequirement;
+use App\Models\ProjectVote;
 use App\Models\UserCertificate;
 use App\Models\UserSkill;
 use Illuminate\Support\Facades\DB;
@@ -15,10 +16,90 @@ use RuntimeException;
 class AdminProjectService
 {
     private CitizenshipService $citizenshipService;
+    private ProjectVoteService $projectVoteService;
 
-    public function __construct(CitizenshipService $citizenshipService)
+    public function __construct(CitizenshipService $citizenshipService, ProjectVoteService $projectVoteService)
     {
         $this->citizenshipService = $citizenshipService;
+        $this->projectVoteService = $projectVoteService;
+    }
+
+    /**
+     * Per-project voting detail for admins/super-admins: the same aggregates
+     * a citizen sees via ProjectController::votingStats(), plus the full
+     * individual-vote audit trail (who voted, when, their citizenship score
+     * snapshot and computed weight) - not exposed to citizens. Works for any
+     * project status, so results remain visible after voting has concluded.
+     */
+    public function votingStatistics($request): array
+    {
+        $project = $this->projectVoteService->withVoteAggregates(Project::query())->find($request['id']);
+
+        if (!$project) {
+            return ['data' => null, 'message' => 'project not found', 'code' => 404];
+        }
+
+        $votes = ProjectVote::query()
+            ->where('project_id', $project->id)
+            ->with('user.profile')
+            ->latest()
+            ->paginate(15);
+
+        $stats = $this->projectVoteService->formatVoteStats($project, null);
+        unset($stats['has_voted'], $stats['my_vote']);
+        $stats['project_name'] = $project->name;
+        $stats['votes'] = $votes;
+
+        return ['data' => $stats, 'message' => 'voting statistics retrieved successfully', 'code' => 200];
+    }
+
+    /**
+     * Platform-wide voting overview across every votable project, for the
+     * admin/super-admin dashboard.
+     */
+    public function votingOverview(): array
+    {
+        $projects = $this->projectVoteService->withVoteAggregates(Project::query()->where('is_votable', true))->get();
+
+        $byVotingStatus = ['not_started' => 0, 'active' => 0, 'expired' => 0, 'force_closed' => 0, 'concluded' => 0];
+        $totalVotes = 0;
+        $totalWeightedYes = 0.0;
+        $totalWeightedNo = 0.0;
+        $percentages = [];
+
+        foreach ($projects as $project) {
+            $status = $project->voting_status;
+            if (array_key_exists($status, $byVotingStatus)) {
+                $byVotingStatus[$status]++;
+            }
+
+            $totalVotes += $project->total_votes;
+
+            $yes = (float) ($project->weighted_yes_votes ?? 0);
+            $no = (float) ($project->weighted_no_votes ?? 0);
+            $totalWeightedYes += $yes;
+            $totalWeightedNo += $no;
+
+            $totalWeighted = $yes + $no;
+            if ($totalWeighted > 0) {
+                $percentages[] = ($yes / $totalWeighted) * 100;
+            }
+        }
+
+        return [
+            'data' => [
+                'total_votable_projects' => $projects->count(),
+                'by_voting_status' => $byVotingStatus,
+                'total_votes_cast' => $totalVotes,
+                'total_weighted_yes_votes' => round($totalWeightedYes, 4),
+                'total_weighted_no_votes' => round($totalWeightedNo, 4),
+                'average_approval_percentage' => count($percentages) > 0
+                    ? round(array_sum($percentages) / count($percentages), 2)
+                    : 0,
+            ],
+            'message' => 'voting overview retrieved successfully',
+            'code' => 200,
+        ];
     }
 
     public function listVolunteerApplications($request): array

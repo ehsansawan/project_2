@@ -171,6 +171,45 @@ class ProjectService
 
         return ['data' => $this->formatProject($project), 'message' => 'project submitted for review successfully', 'code' => 200];
     }
+    /**
+     * Super-admin review queue: submitted projects awaiting an approve/reject
+     * decision, split into votable vs. non-votable. Votable ones are ordered
+     * by raw vote count (how many people voted), highest first - distinct
+     * from ProjectVoteService::listVotable()'s weighted-approval-percentage
+     * ordering, which is about ranking by public support, not review priority.
+     */
+    public function pendingApproval($request): array
+    {
+        $votable = Project::query()
+            ->where('status', ProjectStatus::Submitted)
+            ->where('is_votable', true)
+            ->withCount('votes as total_votes')
+            ->with(['user.profile', 'requirements' => $this->requirementsConstraint()])
+            ->orderByDesc('total_votes')
+            ->latest()
+            ->paginate(15, ['*'], 'votable_page');
+
+        $votable->getCollection()->transform(fn ($project) => $this->formatProject($project));
+
+        $nonVotable = Project::query()
+            ->where('status', ProjectStatus::Submitted)
+            ->where('is_votable', false)
+            ->with(['user.profile', 'requirements' => $this->requirementsConstraint()])
+            ->latest()
+            ->paginate(15, ['*'], 'non_votable_page');
+
+        $nonVotable->getCollection()->transform(fn ($project) => $this->formatProject($project));
+
+        return [
+            'data' => [
+                'votable' => $votable,
+                'non_votable' => $nonVotable,
+            ],
+            'message' => 'pending projects retrieved successfully',
+            'code' => 200,
+        ];
+    }
+
     public function approve($request): array
     {
         $project = Project::query()->find($request['id']);

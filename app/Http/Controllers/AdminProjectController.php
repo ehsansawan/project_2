@@ -23,6 +23,30 @@ class AdminProjectController extends Controller
         $this->projectDonationService = $projectDonationService;
     }
 
+    public function votingOverview()
+    {
+        $data = [];
+        try {
+            $data = $this->adminProjectService->votingOverview();
+            return ApiResponse::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return ApiResponse::error($data, $message);
+        }
+    }
+
+    public function votingStatistics($id)
+    {
+        $data = [];
+        try {
+            $data = $this->adminProjectService->votingStatistics(['id' => $id]);
+            return ApiResponse::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return ApiResponse::error($data, $message);
+        }
+    }
+
     public function listVolunteerApplications($id, Request $request)
     {
         $data = [];

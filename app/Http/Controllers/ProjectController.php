@@ -99,6 +99,18 @@ class ProjectController extends Controller
         }
     }
 
+    public function pendingApproval()
+    {
+        $data = [];
+        try {
+            $data = $this->projectService->pendingApproval([]);
+            return ApiResponse::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return ApiResponse::error($data, $message);
+        }
+    }
+
     public function submitForReview(SubmitProjectRequest $request)
     {
         $data = [];
@@ -176,6 +188,18 @@ class ProjectController extends Controller
         $data = [];
         try {
             $data = $this->projectVoteService->unvote($request->validated());
+            return ApiResponse::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return ApiResponse::error($data, $message);
+        }
+    }
+
+    public function votingStats($id)
+    {
+        $data = [];
+        try {
+            $data = $this->projectVoteService->projectStats(['id' => $id]);
             return ApiResponse::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();

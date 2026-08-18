@@ -117,9 +117,41 @@ class ProjectVoteService
         return null;
     }
 
-    public function listVotable($request): array
+    /**
+     * Aggregate voting stats for a single project, regardless of its status -
+     * unlike listVotable() (which only covers currently-open, is_votable +
+     * submitted projects), this lets a citizen check the final result of a
+     * project whose voting stage has already ended. No individual vote list
+     * here (that's admin-only, see AdminProjectService::votingStatistics()) -
+     * just aggregates plus the caller's own vote, same shape as listVotable().
+     */
+    public function projectStats($request): array
     {
-        $query = Project::query()->votable()->with('user.profile')
+        $project = $this->withVoteAggregates(Project::query())->find($request['id']);
+
+        if (!$project) {
+            return ['data' => null, 'message' => 'project not found', 'code' => 404];
+        }
+
+        $userId = auth('api')->id();
+        $myVote = $userId
+            ? ProjectVote::query()->where('project_id', $project->id)->where('user_id', $userId)->first()
+            : null;
+
+        return [
+            'data' => $this->formatVoteStats($project, $myVote),
+            'message' => 'voting statistics retrieved successfully',
+            'code' => 200,
+        ];
+    }
+
+    /**
+     * Adds weighted yes/no sums and a total vote count to a Project query,
+     * shared by listVotable(), projectStats() and the admin voting endpoints.
+     */
+    public function withVoteAggregates($query)
+    {
+        return $query
             ->withSum(['votes as weighted_yes_votes' => function ($q) {
                 $q->where('value', true);
             }], 'vote_weight')
@@ -127,6 +159,36 @@ class ProjectVoteService
                 $q->where('value', false);
             }], 'vote_weight')
             ->withCount('votes as total_votes');
+    }
+
+    /**
+     * Shared response shape for a single project's vote aggregates.
+     */
+    public function formatVoteStats(Project $project, ?ProjectVote $myVote): array
+    {
+        $yes = (float) ($project->weighted_yes_votes ?? 0);
+        $no = (float) ($project->weighted_no_votes ?? 0);
+        $totalWeighted = $yes + $no;
+
+        return [
+            'project_id' => $project->id,
+            'is_votable' => $project->is_votable,
+            'voting_status' => $project->voting_status,
+            'voting_ends_at' => $project->voting_ends_at,
+            'voting_closed_at' => $project->voting_closed_at,
+            'total_votes' => $project->total_votes,
+            'weighted_yes_votes' => $yes,
+            'weighted_no_votes' => $no,
+            'total_weighted_votes' => $totalWeighted,
+            'approval_percentage' => $totalWeighted > 0 ? round(($yes / $totalWeighted) * 100, 2) : 0,
+            'has_voted' => $myVote !== null,
+            'my_vote' => $myVote,
+        ];
+    }
+
+    public function listVotable($request): array
+    {
+        $query = $this->withVoteAggregates(Project::query()->votable()->with('user.profile'));
 
         // Ordered by weighted approval percentage, not raw vote count. Zero-vote
         // projects (no denominator) are pushed to the end via the -1 sentinel,
