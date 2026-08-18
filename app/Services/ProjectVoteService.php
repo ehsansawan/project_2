@@ -34,20 +34,8 @@ class ProjectVoteService
             return ['data' => null, 'message' => 'project not found', 'code' => 404];
         }
 
-        if (!$project->is_votable) {
-            return ['data' => null, 'message' => 'this project is not open for voting', 'code' => 422];
-        }
-
-        if ($project->status !== ProjectStatus::Submitted) {
-            return ['data' => null, 'message' => 'this project is not currently in the voting stage', 'code' => 422];
-        }
-
-        if ($project->voting_closed_at !== null) {
-            return ['data' => null, 'message' => 'voting on this project has been closed by an administrator', 'code' => 422];
-        }
-
-        if ($project->voting_ends_at !== null && now()->greaterThanOrEqualTo($project->voting_ends_at)) {
-            return ['data' => null, 'message' => 'the voting period for this project has ended', 'code' => 422];
+        if ($blocked = $this->votingWindowError($project)) {
+            return $blocked;
         }
 
         if (ProjectVote::query()->where('project_id', $project->id)->where('user_id', $user->id)->exists()) {
@@ -72,6 +60,61 @@ class ProjectVoteService
         }
 
         return ['data' => $vote, 'message' => 'vote recorded successfully', 'code' => 201];
+    }
+
+    /**
+     * Lets a user withdraw their own vote - e.g. they voted by mistake or
+     * changed their mind. Only allowed while voting is still active, same
+     * window as casting a vote in the first place; to switch a yes/no choice,
+     * unvote then vote again with the new value.
+     */
+    public function unvote($request): array
+    {
+        $user = auth('api')->user();
+        $project = Project::query()->find($request['id']);
+
+        if (!$project) {
+            return ['data' => null, 'message' => 'project not found', 'code' => 404];
+        }
+
+        if ($blocked = $this->votingWindowError($project)) {
+            return $blocked;
+        }
+
+        $vote = ProjectVote::query()->where('project_id', $project->id)->where('user_id', $user->id)->first();
+
+        if (!$vote) {
+            return ['data' => null, 'message' => 'you have not voted on this project', 'code' => 404];
+        }
+
+        $vote->delete();
+
+        return ['data' => null, 'message' => 'vote removed successfully', 'code' => 200];
+    }
+
+    /**
+     * Shared eligibility checks for both vote() and unvote(): returns an
+     * error response array if voting isn't currently open, null otherwise.
+     */
+    private function votingWindowError(Project $project): ?array
+    {
+        if (!$project->is_votable) {
+            return ['data' => null, 'message' => 'this project is not open for voting', 'code' => 422];
+        }
+
+        if ($project->status !== ProjectStatus::Submitted) {
+            return ['data' => null, 'message' => 'this project is not currently in the voting stage', 'code' => 422];
+        }
+
+        if ($project->voting_closed_at !== null) {
+            return ['data' => null, 'message' => 'voting on this project has been closed by an administrator', 'code' => 422];
+        }
+
+        if ($project->voting_ends_at !== null && now()->greaterThanOrEqualTo($project->voting_ends_at)) {
+            return ['data' => null, 'message' => 'the voting period for this project has ended', 'code' => 422];
+        }
+
+        return null;
     }
 
     public function listVotable($request): array

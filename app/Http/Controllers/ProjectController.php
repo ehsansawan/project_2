@@ -9,6 +9,7 @@ use App\Http\Requests\Project\DeleteProjectRequest;
 use App\Http\Requests\Project\IndexProjectRequest;
 use App\Http\Requests\Project\RejectProjectRequest;
 use App\Http\Requests\Project\SubmitProjectRequest;
+use App\Http\Requests\Project\UnvoteProjectRequest;
 use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Http\Requests\Project\VoteProjectRequest;
 use App\Http\Responses\ApiResponse;
@@ -163,6 +164,18 @@ class ProjectController extends Controller
         $data = [];
         try {
             $data = $this->projectVoteService->vote($request->validated());
+            return ApiResponse::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return ApiResponse::error($data, $message);
+        }
+    }
+
+    public function unvote(UnvoteProjectRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->projectVoteService->unvote($request->validated());
             return ApiResponse::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();

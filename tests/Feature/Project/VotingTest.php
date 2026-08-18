@@ -220,4 +220,64 @@ class VotingTest extends TestCase
 
         $this->assertSame([$highApproval->id, $mixed->id, $zeroVotes->id], $ids);
     }
+
+    public function test_user_can_withdraw_their_own_vote(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $user = $this->makeUser();
+        $this->makeProfile($user, 40);
+        [, $headers] = $this->actingAsApi($user, ['project.vote', 'project.unvote']);
+
+        $this->postJson("/api/project/vote/{$project->id}", ['value' => true], $headers)->assertStatus(201);
+        $this->assertDatabaseHas('project_votes', ['project_id' => $project->id, 'user_id' => $user->id]);
+
+        $response = $this->deleteJson("/api/project/vote/{$project->id}", [], $headers);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing('project_votes', ['project_id' => $project->id, 'user_id' => $user->id]);
+    }
+
+    public function test_user_can_change_their_mind_by_unvoting_then_revoting(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $user = $this->makeUser();
+        $this->makeProfile($user, 40);
+        [, $headers] = $this->actingAsApi($user, ['project.vote', 'project.unvote']);
+
+        $this->postJson("/api/project/vote/{$project->id}", ['value' => false], $headers)->assertStatus(201);
+        $this->deleteJson("/api/project/vote/{$project->id}", [], $headers)->assertStatus(200);
+
+        $response = $this->postJson("/api/project/vote/{$project->id}", ['value' => true], $headers);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('project_votes', ['project_id' => $project->id, 'user_id' => $user->id, 'value' => 1]);
+    }
+
+    public function test_cannot_unvote_a_project_the_user_never_voted_on(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $user = $this->makeUser();
+        [, $headers] = $this->actingAsApi($user, ['project.unvote']);
+
+        $response = $this->deleteJson("/api/project/vote/{$project->id}", [], $headers);
+
+        $response->assertStatus(404);
+    }
+
+    public function test_cannot_unvote_after_voting_has_been_force_closed(): void
+    {
+        $project = $this->votableSubmittedProject();
+        $user = $this->makeUser();
+        $this->makeProfile($user, 40);
+        [, $headers] = $this->actingAsApi($user, ['project.vote', 'project.unvote']);
+
+        $this->postJson("/api/project/vote/{$project->id}", ['value' => true], $headers)->assertStatus(201);
+
+        $project->update(['voting_closed_at' => now()]);
+
+        $response = $this->deleteJson("/api/project/vote/{$project->id}", [], $headers);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('project_votes', ['project_id' => $project->id, 'user_id' => $user->id]);
+    }
 }

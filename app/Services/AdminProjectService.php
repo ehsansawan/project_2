@@ -32,7 +32,6 @@ class AdminProjectService
 
         return ['data' => $applications, 'message' => 'volunteer applications retrieved successfully', 'code' => 200];
     }
-
     public function approveVolunteerApplication($request): array
     {
         $admin = auth('api')->user();
@@ -113,7 +112,6 @@ class AdminProjectService
 
         return ['data' => $participant->load('user.profile', 'requirement'), 'message' => 'volunteer application approved successfully', 'code' => 200];
     }
-
     public function rejectVolunteerApplication($request): array
     {
         $admin = auth('api')->user();
@@ -142,7 +140,6 @@ class AdminProjectService
 
         return ['data' => $participant->load('user.profile'), 'message' => 'volunteer application rejected successfully', 'code' => 200];
     }
-
     public function forceCloseVoting($request): array
     {
         $admin = auth('api')->user();

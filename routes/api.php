@@ -144,6 +144,7 @@ Route::middleware([jwtMiddleware::class,])->group(function () {
             Route::post('/update/{id}', 'update')->name('update')->middleware('can:project.update');
             Route::delete('/{id}', 'destroy')->name('destroy')->middleware('can:project.destroy');
             Route::post('/vote/{id}', 'vote')->name('vote')->middleware('can:project.vote');
+            Route::delete('/vote/{id}', 'unvote')->name('unvote')->middleware('can:project.unvote');
             Route::post('/volunteer/{id}', 'applyVolunteer')->name('applyVolunteer')->middleware('can:project.applyVolunteer');
             Route::get('/{id}/donations', 'listDonations')->name('listDonations')->middleware('can:project.listDonations');
             Route::get('/{id}/donations/stats', 'donationStats')->name('donationStats')->middleware('can:project.donationStats');
